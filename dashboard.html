@@ -19,6 +19,21 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="dashboard.css" />
+    <style>
+      /* Card ကို နှိပ်လို့ရမှန်း သိသာစေရန် ထပ်တိုး style */
+      .summary-card.inc,
+      .summary-card.exp {
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .summary-card.inc:hover,
+      .summary-card.exp:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -51,16 +66,24 @@
       </div>
 
       <div class="summary-grid">
-        <div class="summary-card inc">
+        <div
+          class="summary-card inc"
+          onclick="window.location.href = 'history.html?filter=income'"
+        >
           <i class="fa-solid fa-circle-arrow-up"></i>
           <small id="lbl-income">ဝင်ငွေ</small>
           <p class="amount">+ <span id="val-income">0</span></p>
         </div>
-        <div class="summary-card exp">
+
+        <div
+          class="summary-card exp"
+          onclick="window.location.href = 'history.html?filter=expense'"
+        >
           <i class="fa-solid fa-circle-arrow-down"></i>
           <small id="lbl-expense">အသုံးစရိတ်</small>
           <p class="amount">- <span id="val-expense">0</span></p>
         </div>
+
         <div class="summary-card bal">
           <i class="fa-solid fa-wallet"></i>
           <small id="lbl-balance">လက်ကျန်</small>
@@ -157,7 +180,7 @@
         localStorage.setItem("theme", target);
         document.getElementById("theme-toggle").innerText =
           target === "dark" ? "☀️" : "🌙";
-        loadData(); // Reload for chart colors
+        loadData();
       }
 
       function changeLang(lang) {
@@ -177,6 +200,7 @@
           langData[lang]["opt-inc"];
         document.getElementById("opt-exp").innerText =
           langData[lang]["opt-exp"];
+
         document
           .querySelectorAll(".lang-btn")
           .forEach((b) => b.classList.remove("active"));
@@ -261,6 +285,7 @@
         };
         if (!payload.date || !payload.amount)
           return alert("Fill required fields!");
+
         btn.disabled = true;
         const { error } = await _supabase
           .from("transactions")

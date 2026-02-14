@@ -37,7 +37,6 @@
         padding: 0 16px;
       }
 
-      /* Header & Nav */
       .top-header {
         display: flex;
         justify-content: space-between;
@@ -62,7 +61,6 @@
         transform: translateX(-4px);
       }
 
-      /* Language Toggle */
       .lang-switcher {
         display: flex;
         background: #e2e8f0;
@@ -87,7 +85,6 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
-      /* Analytics Card */
       .overview-card {
         background: var(--primary-gradient);
         color: white;
@@ -98,6 +95,21 @@
         display: flex;
         justify-content: space-around;
         text-align: center;
+      }
+      .stat-item {
+        flex: 1;
+        cursor: pointer;
+        transition: 0.3s;
+        border-radius: 16px;
+        padding: 10px;
+      }
+      .stat-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .stat-item.active-filter {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.4);
       }
       .stat-item h4 {
         font-size: 13px;
@@ -110,7 +122,6 @@
         font-weight: 700;
       }
 
-      /* Search & Filter Bar */
       .filter-bar {
         background: white;
         padding: 16px;
@@ -163,7 +174,6 @@
         gap: 8px;
       }
 
-      /* Transaction Items */
       .history-list {
         display: flex;
         flex-direction: column;
@@ -185,7 +195,6 @@
         transform: translateY(-2px);
         box-shadow: var(--card-shadow);
       }
-
       .item-main {
         display: flex;
         align-items: center;
@@ -208,7 +217,6 @@
         background: #fee2e2;
         color: #dc2626;
       }
-
       .info-cat {
         font-weight: 700;
         color: #1e293b;
@@ -225,7 +233,6 @@
         font-style: italic;
         margin-top: 2px;
       }
-
       .item-amount {
         text-align: right;
       }
@@ -249,7 +256,6 @@
         background: #f43f5e;
         color: white;
       }
-
       .empty-state {
         text-align: center;
         padding: 60px 0;
@@ -274,12 +280,12 @@
       </div>
 
       <div class="overview-card" id="stats-card" style="display: none">
-        <div class="stat-item">
+        <div class="stat-item" id="card-inc" onclick="toggleFilter('income')">
           <h4 id="lbl-inc">Income</h4>
           <div class="amount" id="stat-inc">0</div>
         </div>
         <div style="width: 1px; background: rgba(255, 255, 255, 0.2)"></div>
-        <div class="stat-item">
+        <div class="stat-item" id="card-exp" onclick="toggleFilter('expense')">
           <h4 id="lbl-exp">Expense</h4>
           <div class="amount" id="stat-exp">0</div>
         </div>
@@ -308,6 +314,7 @@
 
       let allData = [];
       let currentLang = "mm";
+      let activeTypeFilter = null; // 'income', 'expense' သို့မဟုတ် null
 
       const langData = {
         mm: {
@@ -344,6 +351,22 @@
         renderList(allData);
       }
 
+      // Filter ကို Toggle လုပ်မည့် Function
+      function toggleFilter(type) {
+        if (activeTypeFilter === type) {
+          activeTypeFilter = null; // တူညီတာကို ထပ်နှိပ်ရင် Filter ဖြုတ်မယ်
+        } else {
+          activeTypeFilter = type; // မတူတာနှိပ်ရင် Filter အသစ်ပြောင်းမယ်
+        }
+
+        // URL မှာ parameter ရှိနေရင် ဖယ်ရှားပေးခြင်း (Optional - UI သန့်ရှင်းစေရန်)
+        const url = new URL(window.location);
+        url.searchParams.delete("filter");
+        window.history.replaceState({}, "", url);
+
+        loadFullHistory();
+      }
+
       async function loadFullHistory() {
         const {
           data: { user },
@@ -353,18 +376,40 @@
           return;
         }
 
+        // ပထမဆုံးအကြိမ် Dashboard ကလာလျှင် URL က parameter ကိုယူသည်
+        const urlParams = new URLSearchParams(window.location.search);
+        const typeParam = urlParams.get("filter");
+
+        if (typeParam && activeTypeFilter === null) {
+          activeTypeFilter = typeParam;
+        }
+
         let query = _supabase
           .from("transactions")
           .select("*")
           .order("date", { ascending: false });
+
         const filterDate = document.getElementById("filter-date").value;
         if (filterDate) query = query.eq("date", filterDate);
+
+        if (activeTypeFilter === "income") query = query.eq("type", "Income");
+        if (activeTypeFilter === "expense") query = query.eq("type", "Expense");
 
         const { data } = await query;
         if (data) {
           allData = data;
           renderList(data);
+          updateFilterUI();
         }
+      }
+
+      function updateFilterUI() {
+        document
+          .getElementById("card-inc")
+          .classList.toggle("active-filter", activeTypeFilter === "income");
+        document
+          .getElementById("card-exp")
+          .classList.toggle("active-filter", activeTypeFilter === "expense");
       }
 
       function renderList(data) {
@@ -373,7 +418,7 @@
         listDiv.innerHTML = "";
 
         if (data.length === 0) {
-          statsCard.style.display = "none";
+          statsCard.style.display = activeTypeFilter ? "flex" : "none";
           listDiv.innerHTML = `<div class="empty-state"><i class="fa-solid fa-folder-open" style="font-size: 40px; margin-bottom: 10px;"></i><p>${langData[currentLang].empty}</p></div>`;
           return;
         }
