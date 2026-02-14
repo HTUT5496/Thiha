@@ -288,18 +288,18 @@
         const password = document.getElementById("login-password").value;
         if (!email || !password) return setStatus("Please fill all fields");
         const btn = document.getElementById("lbl-login-btn");
+        const originalText = btn.innerText;
         btn.innerText = "...";
         btn.disabled = true;
+
         const { error: loginError } = await _supabase.auth.signInWithPassword({
           email,
           password,
         });
+
         if (loginError) {
           setStatus(loginError.message);
-          btn.innerText =
-            translations[localStorage.getItem("selectedLang") || "mm"].labels[
-              "login-btn"
-            ];
+          btn.innerText = originalText;
           btn.disabled = false;
         } else {
           window.location.href = "dashboard.html";
@@ -310,13 +310,35 @@
         const email = document.getElementById("signup-email").value;
         const password = document.getElementById("signup-password").value;
         const confirm = document.getElementById("signup-confirm").value;
+        const btn = document.getElementById("lbl-signup-btn");
+        const originalText = btn.innerText;
+
+        if (!email || !password || !confirm)
+          return setStatus("Please fill all fields");
         if (password !== confirm) return setStatus("Passwords do not match!");
+
+        btn.innerText = "...";
+        btn.disabled = true;
+
         const { error: signUpError } = await _supabase.auth.signUp({
           email,
           password,
         });
-        if (signUpError) setStatus(signUpError.message);
-        else setStatus("Verification email sent! Check your inbox.", false);
+
+        if (signUpError) {
+          setStatus(signUpError.message);
+          btn.innerText = originalText;
+          btn.disabled = false;
+        } else {
+          setStatus(
+            "Verification email sent! Check your Gmail and confirm before logging in.",
+            false,
+          );
+          btn.innerText = originalText;
+          btn.disabled = false;
+          // Redirect to login form so user can log in after confirming
+          setTimeout(() => showForm("login"), 3000);
+        }
       }
 
       async function handleForgotPassword() {
@@ -335,6 +357,8 @@
           savedTheme === "dark" ? "☀️" : "🌙";
         const savedLang = localStorage.getItem("selectedLang") || "mm";
         changeLang(savedLang);
+        // Show login by default if they came from a registration redirect
+        showForm("signup");
       };
     </script>
   </body>
