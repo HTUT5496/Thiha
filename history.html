@@ -18,6 +18,108 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="history.css" />
+    <style>
+      /* --- New Modern Layout Styles --- */
+      .filter-row-bottom {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .date-input-group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--input-bg);
+        padding: 6px 12px;
+        border-radius: 14px;
+        border: 2px solid var(--border-color);
+        flex: 1;
+        transition: 0.3s;
+      }
+
+      .date-input-group:focus-within {
+        border-color: #4f46e5;
+      }
+
+      .date-input-group input {
+        border: none;
+        outline: none;
+        background: transparent;
+        color: var(--text-main);
+        font-family: inherit;
+        width: 100%;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      .date-sep {
+        color: var(--text-sub);
+        font-weight: bold;
+      }
+
+      /* Reset Button Inside Date Group */
+      .btn-reset-inline {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-sub);
+        border-radius: 10px;
+        padding: 6px 10px;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-reset-inline:hover {
+        color: #ef4444;
+        background: #fee2e2;
+        transform: rotate(-15deg);
+      }
+
+      /* Export Button Row */
+      .history-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 20px 0 10px 0;
+      }
+
+      .history-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-sub);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .btn-download-modern {
+        background: #10b981; /* Excel Green */
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+      }
+
+      .btn-download-modern:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+      }
+
+      [data-theme="dark"] .btn-reset-inline {
+        background: #334155;
+      }
+    </style>
   </head>
   <body>
     <div class="history-container">
@@ -72,12 +174,28 @@
             <i class="fa-solid fa-circle-xmark"></i>
           </button>
         </div>
+
         <div class="filter-row-bottom">
-          <input type="date" id="filter-date" onchange="loadFullHistory()" />
-          <button class="btn-download-modern" onclick="exportCSV()">
-            <i class="fa-solid fa-download"></i>
-          </button>
+          <div class="date-input-group">
+            <input type="date" id="date-from" onchange="loadFullHistory()" />
+            <span class="date-sep">-</span>
+            <input type="date" id="date-to" onchange="loadFullHistory()" />
+            <button
+              class="btn-reset-inline"
+              onclick="resetFilters()"
+              title="Reset Filters"
+            >
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
         </div>
+      </div>
+
+      <div class="history-header-row">
+        <span class="history-title">Transactions</span>
+        <button class="btn-download-modern" onclick="exportCSV()">
+          <i class="fa-solid fa-file-excel"></i> <span>Export CSV</span>
+        </button>
       </div>
 
       <div id="full-history-list"></div>
@@ -109,7 +227,6 @@
         },
       };
 
-      // --- Search UI Logic ---
       function handleSearch(input) {
         const clearBtn = document.getElementById("clear-search");
         clearBtn.style.display = input.value ? "block" : "none";
@@ -123,7 +240,6 @@
         filterData();
       }
 
-      // --- Theme Logic ---
       function toggleDarkMode() {
         const currentTheme =
           document.documentElement.getAttribute("data-theme");
@@ -135,8 +251,9 @@
 
       function updateThemeIcon(theme) {
         const icon = document.querySelector(".theme-toggle i");
-        icon.className =
-          theme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
+        if (icon)
+          icon.className =
+            theme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
       }
 
       function changeLang(lang) {
@@ -156,6 +273,15 @@
         loadFullHistory();
       }
 
+      function resetFilters() {
+        document.getElementById("date-from").value = "";
+        document.getElementById("date-to").value = "";
+        document.getElementById("search-bar").value = "";
+        document.getElementById("clear-search").style.display = "none";
+        activeTypeFilter = null;
+        loadFullHistory();
+      }
+
       async function loadFullHistory() {
         const {
           data: { user },
@@ -169,8 +295,13 @@
           .from("transactions")
           .select("*")
           .order("date", { ascending: false });
-        const filterDate = document.getElementById("filter-date").value;
-        if (filterDate) query = query.eq("date", filterDate);
+
+        const dateFrom = document.getElementById("date-from").value;
+        const dateTo = document.getElementById("date-to").value;
+
+        if (dateFrom) query = query.gte("date", dateFrom);
+        if (dateTo) query = query.lte("date", dateTo);
+
         if (activeTypeFilter === "income") query = query.eq("type", "Income");
         if (activeTypeFilter === "expense") query = query.eq("type", "Expense");
 
@@ -197,6 +328,8 @@
 
         if (data.length === 0) {
           listDiv.innerHTML = `<div style="text-align:center; padding:60px; color:var(--text-sub); font-size:14px;">${langData[currentLang].empty}</div>`;
+          document.getElementById("stat-inc").innerText = "0";
+          document.getElementById("stat-exp").innerText = "0";
           return;
         }
 

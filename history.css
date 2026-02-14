@@ -171,33 +171,79 @@ body {
   color: var(--text-sub);
   cursor: pointer;
   padding: 5px;
-  display: none; /* Hidden by default */
+  display: none;
 }
 
+/* --- Added Date Range & Reset Styles --- */
 .filter-row-bottom {
   display: flex;
   gap: 10px;
+  align-items: stretch;
 }
 
-input[type="date"] {
-  flex: 1;
-  padding: 12px;
+.date-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--input-bg);
+  padding: 4px 12px;
   border-radius: 14px;
   border: 2px solid var(--border-color);
-  background: var(--input-bg);
+  flex: 1;
+}
+
+.date-input-group input[type="date"] {
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  width: 100%;
+  font-family: inherit;
   color: var(--text-main);
-  font-weight: 500;
+  outline: none;
+}
+
+.date-sep {
+  color: var(--text-sub);
+  font-weight: bold;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-reset {
+  background: var(--month-label-bg);
+  color: var(--text-sub);
+  border: 2px solid var(--border-color);
+  width: 46px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.btn-reset:hover {
+  background: var(--border-color);
+  color: #4f46e5;
+  transform: rotate(-45deg);
 }
 
 .btn-download-modern {
   background: #4f46e5;
   color: white;
   border: none;
-  padding: 0 20px;
+  padding: 0 16px;
   border-radius: 14px;
   cursor: pointer;
   transition: 0.3s;
   box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-download-modern:hover {
