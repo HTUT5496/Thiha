@@ -1,135 +1,122 @@
-:root {
-  --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+/* history.css */
 
-  /* Light Theme Colors */
-  --bg-body: #f8fafc;
-  --bg-card: #ffffff;
+:root {
+  --primary: #3b82f6;
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
   --text-main: #1e293b;
-  --text-sub: #64748b;
-  --border-color: #f1f5f9;
-  --input-bg: #f8fafc;
-  --month-label-bg: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-glass: rgba(0, 0, 0, 0.05);
+  --income: #10b981;
+  --expense: #ef4444;
+  --font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 [data-theme="dark"] {
-  --bg-body: #0f172a;
-  --bg-card: #1e293b;
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
   --text-main: #f1f5f9;
-  --text-sub: #94a3b8;
-  --border-color: #334155;
-  --input-bg: #0f172a;
-  --month-label-bg: #334155;
+  --text-muted: #64748b;
+  --border-glass: rgba(255, 255, 255, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background-color: var(--bg-body);
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
   color: var(--text-main);
-  font-family: "Inter", sans-serif;
+  line-height: 1.6;
   transition: background 0.3s ease;
-  margin: 0;
 }
 
 .history-container {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 0 16px;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
 }
 
-/* --- Header --- */
+/* Header & Navigation */
 .top-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 25px;
+}
+
+.back-nav {
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .header-right {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 15px;
 }
 
-.back-nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.lang-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border-glass);
+  padding: 5px 10px;
+  border-radius: 8px;
   cursor: pointer;
-  color: var(--text-sub);
-  font-weight: 600;
-  padding: 8px 12px;
-  border-radius: 12px;
-  background: var(--bg-card);
-  box-shadow: var(--card-shadow);
-  transition: 0.2s;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
-.theme-toggle {
-  background: var(--bg-card);
-  border: none;
-  color: var(--text-main);
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  cursor: pointer;
-  box-shadow: var(--card-shadow);
-  font-size: 18px;
+.lang-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
 }
 
-/* --- Stat Buttons --- */
-.overview-card {
-  display: flex;
+/* Total Amount Card */
+.balance-card {
+  background: var(--card-bg);
+  padding: 24px;
+  border-radius: 24px;
+  text-align: center;
+  border: 1px solid var(--border-glass);
+  margin-bottom: 15px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.balance-card .amount {
+  font-size: 32px;
+  font-weight: 800;
+  margin-top: 5px;
+}
+
+/* Overview Grid */
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .stat-btn {
-  flex: 1;
-  background: var(--bg-card);
-  border: 2px solid transparent;
-  padding: 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: 0.3s;
-  text-align: center;
-  box-shadow: var(--card-shadow);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 
-.stat-btn h4 {
-  font-size: 12px;
-  color: var(--text-sub);
-  margin-bottom: 5px;
-  font-weight: 600;
-  text-transform: uppercase;
+.stat-btn:active {
+  transform: scale(0.95);
 }
 
-.stat-btn .amount {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--text-main);
-}
-
-.stat-btn.active-filter#card-inc {
-  border-color: #16a34a;
-  background: rgba(22, 163, 74, 0.1);
-}
-
-.stat-btn.active-filter#card-exp {
-  border-color: #dc2626;
-  background: rgba(220, 38, 38, 0.1);
-}
-
-/* --- Updated Search & Filter Bar --- */
+/* Filter & Search Bar */
 .filter-bar {
-  background: var(--bg-card);
-  padding: 20px;
-  border-radius: 24px;
-  box-shadow: var(--card-shadow);
-  margin-bottom: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  border: 1px solid var(--border-color);
+  margin-bottom: 20px;
 }
 
 .search-box {
@@ -138,147 +125,41 @@ body {
   align-items: center;
 }
 
-.search-box i.fa-magnifying-glass {
+.search-box i {
   position: absolute;
-  left: 16px;
-  color: var(--text-sub);
-  transition: 0.3s;
+  left: 15px;
+  color: var(--text-muted);
 }
 
 .search-box input {
   width: 100%;
-  padding: 14px 14px 14px 46px;
+  padding: 12px 15px 12px 40px;
   border-radius: 16px;
-  border: 2px solid var(--border-color);
-  background: var(--input-bg);
-  color: var(--text-main);
-  font-size: 15px;
-  transition: all 0.3s ease;
-  outline: none;
-}
-
-.search-box input:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-  background: var(--bg-card);
-}
-
-.btn-clear-search {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  color: var(--text-sub);
-  cursor: pointer;
-  padding: 5px;
-  display: none;
-}
-
-/* --- Added Date Range & Reset Styles --- */
-.filter-row-bottom {
-  display: flex;
-  gap: 10px;
-  align-items: stretch;
-}
-
-.date-input-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--input-bg);
-  padding: 4px 12px;
-  border-radius: 14px;
-  border: 2px solid var(--border-color);
-  flex: 1;
-}
-
-.date-input-group input[type="date"] {
-  border: none;
-  background: transparent;
-  padding: 8px 0;
-  width: 100%;
-  font-family: inherit;
+  border: 1px solid var(--border-glass);
+  background: var(--card-bg);
   color: var(--text-main);
   outline: none;
 }
 
-.date-sep {
-  color: var(--text-sub);
-  font-weight: bold;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-reset {
-  background: var(--month-label-bg);
-  color: var(--text-sub);
-  border: 2px solid var(--border-color);
-  width: 46px;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-}
-
-.btn-reset:hover {
-  background: var(--border-color);
-  color: #4f46e5;
-  transform: rotate(-45deg);
-}
-
-.btn-download-modern {
-  background: #4f46e5;
-  color: white;
-  border: none;
-  padding: 0 16px;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: 0.3s;
-  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-download-modern:hover {
-  background: #4338ca;
-  transform: translateY(-1px);
-}
-
-/* --- List Styling --- */
+/* Transaction List */
 .month-group-label {
-  padding: 6px 14px;
-  font-weight: 700;
-  color: var(--text-sub);
   font-size: 13px;
-  background: var(--month-label-bg);
-  border-radius: 20px;
-  margin: 24px 0 12px 0;
-  display: inline-block;
-  border: 1px solid var(--border-color);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin: 20px 0 10px 5px;
+  letter-spacing: 0.5px;
 }
 
 .transaction-item {
-  background: var(--bg-card);
-  padding: 16px;
-  border-radius: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: 0.3s;
-  border: 1px solid var(--border-color);
-  margin-bottom: 10px;
-}
-
-.transaction-item:hover {
-  transform: translateY(-3px);
-  border-color: #4f46e5;
+  background: var(--card-bg);
+  padding: 16px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-glass);
 }
 
 .icon-circle {
@@ -292,67 +173,101 @@ body {
 }
 
 .inc-icon {
-  background: rgba(22, 163, 74, 0.15);
-  color: #22c55e;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--income);
 }
 .exp-icon {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--expense);
 }
 
-.info-cat {
-  font-weight: 700;
-  color: var(--text-main);
-  display: block;
-}
-.info-date {
-  font-size: 11px;
-  color: var(--text-sub);
+.item-middle {
+  flex: 1;
+  padding: 0 15px;
 }
 
-.btn-del {
-  background: transparent;
-  color: var(--text-sub);
-  border: 1.5px solid var(--border-color);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+/* Editable Note Bubble */
+.note-bubble {
+  background: rgba(0, 0, 0, 0.03);
+  padding: 6px 12px;
+  border-radius: 10px;
+  margin: 5px 0;
+  font-size: 12px;
+  color: var(--text-muted);
   cursor: pointer;
-  transition: 0.2s;
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
+  border-left: 3px solid var(--primary);
+}
+
+[data-theme="dark"] .note-bubble {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.note-bubble:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Delete Button */
+.btn-del {
+  transition: opacity 0.2s;
 }
 
 .btn-del:hover {
-  background: #fee2e2;
-  color: #ef4444;
-  border-color: #fecaca;
-  transform: rotate(90deg);
+  opacity: 1 !important;
 }
 
-.lang-switcher {
-  display: flex;
-  background: var(--month-label-bg);
-  padding: 4px;
-  border-radius: 10px;
-  gap: 4px;
+/* Responsive */
+@media (max-width: 400px) {
+  .balance-card .amount {
+    font-size: 26px;
+  }
 }
-
-.lang-btn {
+/* Modern Delete Button Styling */
+.btn-del {
+  background: rgba(239, 68, 68, 0.08); /* Subtle red background */
+  color: var(--expense);
   border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%; /* Circular button */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-  background: transparent;
-  color: var(--text-sub);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.6; /* Dimmed by default */
+  flex-shrink: 0;
 }
 
-.lang-btn.active {
-  background: var(--bg-card);
-  color: #4f46e5;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.btn-del:hover {
+  background: var(--expense);
+  color: #ffffff;
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+}
+
+.btn-del:active {
+  transform: scale(0.9);
+}
+
+/* Dark mode adjustment */
+[data-theme="dark"] .btn-del {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Ensure the transaction item aligns the button properly */
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Vertically center all items */
+  gap: 10px;
+}
+
+.transaction-item > div:last-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px; /* Space between amount and delete button */
 }

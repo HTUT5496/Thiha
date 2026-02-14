@@ -14,122 +14,51 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="history.css" />
-    <style>
-      /* --- New Modern Layout Styles --- */
-      .filter-row-bottom {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
-
-      .date-input-group {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        background: var(--input-bg);
-        padding: 6px 12px;
-        border-radius: 14px;
-        border: 2px solid var(--border-color);
-        flex: 1;
-        transition: 0.3s;
-      }
-
-      .date-input-group:focus-within {
-        border-color: #4f46e5;
-      }
-
-      .date-input-group input {
-        border: none;
-        outline: none;
-        background: transparent;
-        color: var(--text-main);
-        font-family: inherit;
-        width: 100%;
-        font-size: 13px;
-        cursor: pointer;
-      }
-
-      .date-sep {
-        color: var(--text-sub);
-        font-weight: bold;
-      }
-
-      /* Reset Button Inside Date Group */
-      .btn-reset-inline {
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        color: var(--text-sub);
-        border-radius: 10px;
-        padding: 6px 10px;
-        cursor: pointer;
-        transition: 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .btn-reset-inline:hover {
-        color: #ef4444;
-        background: #fee2e2;
-        transform: rotate(-15deg);
-      }
-
-      /* Export Button Row */
-      .history-header-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 20px 0 10px 0;
-      }
-
-      .history-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--text-sub);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .btn-download-modern {
-        background: #10b981; /* Excel Green */
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 13px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: 0.3s;
-        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
-      }
-
-      .btn-download-modern:hover {
-        background: #059669;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
-      }
-
-      [data-theme="dark"] .btn-reset-inline {
-        background: #334155;
-      }
-    </style>
   </head>
   <body>
     <div class="history-container">
       <div class="top-header">
-        <div class="back-nav" onclick="window.location.href = 'dashboard.html'">
-          <i class="fa-solid fa-arrow-left"></i> <span id="lbl-back">Back</span>
-        </div>
+        <button
+          class="btn-dashboard"
+          onclick="window.location.href = 'dashboard.html'"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-glass);
+            padding: 8px 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: inherit;
+            font-family: inherit;
+            font-weight: 600;
+          "
+        >
+          <i
+            class="fa-solid fa-house"
+            style="color: var(--primary); font-size: 14px"
+          ></i>
+          <span id="lbl-back">Back</span>
+        </button>
+
         <div class="header-right">
-          <button class="theme-toggle" onclick="toggleDarkMode()">
-            <i class="fa-solid fa-moon"></i>
+          <button
+            class="theme-toggle"
+            onclick="toggleDarkMode()"
+            style="
+              background: none;
+              border: none;
+              cursor: pointer;
+              font-size: 18px;
+              color: inherit;
+            "
+          >
+            <i class="fa-solid fa-moon" id="theme-icon"></i>
           </button>
           <div class="lang-switcher">
             <button class="lang-btn" id="btn-en" onclick="changeLang('en')">
@@ -142,18 +71,76 @@
         </div>
       </div>
 
-      <div class="overview-card">
-        <button class="stat-btn" id="card-inc" onclick="toggleFilter('income')">
-          <h4 id="lbl-inc">Income</h4>
-          <div class="amount" id="stat-inc">0</div>
+      <div class="balance-card">
+        <small
+          id="lbl-total-amount"
+          style="
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+          "
+          >Total Amount</small
+        >
+        <div class="amount" id="stat-bal">0</div>
+      </div>
+
+      <div
+        class="overview-grid"
+        style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin-bottom: 20px;
+        "
+      >
+        <button
+          class="stat-btn"
+          id="card-inc"
+          onclick="toggleFilter('income')"
+          style="
+            background: var(--card-bg);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 15px;
+            cursor: pointer;
+            color: inherit;
+          "
+        >
+          <h4 id="lbl-inc" style="font-size: 11px; color: #94a3b8; margin: 0">
+            Income
+          </h4>
+          <div
+            class="amount"
+            id="stat-inc"
+            style="color: #10b981; font-weight: 800; font-size: 18px"
+          >
+            0
+          </div>
         </button>
         <button
           class="stat-btn"
           id="card-exp"
           onclick="toggleFilter('expense')"
+          style="
+            background: var(--card-bg);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 15px;
+            cursor: pointer;
+            color: inherit;
+          "
         >
-          <h4 id="lbl-exp">Expense</h4>
-          <div class="amount" id="stat-exp">0</div>
+          <h4 id="lbl-exp" style="font-size: 11px; color: #94a3b8; margin: 0">
+            Expense
+          </h4>
+          <div
+            class="amount"
+            id="stat-exp"
+            style="color: #ef4444; font-weight: 800; font-size: 18px"
+          >
+            0
+          </div>
         </button>
       </div>
 
@@ -164,37 +151,99 @@
             type="text"
             id="search-bar"
             onkeyup="handleSearch(this)"
-            placeholder="Search category or notes..."
+            placeholder="Search..."
           />
           <button
             id="clear-search"
             class="btn-clear-search"
             onclick="clearSearch()"
+            style="display: none"
           >
             <i class="fa-solid fa-circle-xmark"></i>
           </button>
         </div>
-
-        <div class="filter-row-bottom">
-          <div class="date-input-group">
-            <input type="date" id="date-from" onchange="loadFullHistory()" />
-            <span class="date-sep">-</span>
-            <input type="date" id="date-to" onchange="loadFullHistory()" />
-            <button
-              class="btn-reset-inline"
-              onclick="resetFilters()"
-              title="Reset Filters"
-            >
-              <i class="fa-solid fa-rotate-right"></i>
-            </button>
-          </div>
+        <div style="display: flex; gap: 8px; margin-top: 10px">
+          <input
+            type="date"
+            id="date-from"
+            onchange="loadFullHistory()"
+            style="
+              flex: 1;
+              padding: 10px;
+              border-radius: 12px;
+              border: 1px solid var(--border-glass);
+              background: var(--card-bg);
+              color: inherit;
+            "
+          />
+          <input
+            type="date"
+            id="date-to"
+            onchange="loadFullHistory()"
+            style="
+              flex: 1;
+              padding: 10px;
+              border-radius: 12px;
+              border: 1px solid var(--border-glass);
+              background: var(--card-bg);
+              color: inherit;
+            "
+          />
+          <button
+            onclick="resetFilters()"
+            style="
+              padding: 10px;
+              border-radius: 12px;
+              border: 1px solid var(--border-glass);
+              background: var(--card-bg);
+              cursor: pointer;
+              color: inherit;
+            "
+          >
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
         </div>
       </div>
 
-      <div class="history-header-row">
-        <span class="history-title">Transactions</span>
-        <button class="btn-download-modern" onclick="exportCSV()">
-          <i class="fa-solid fa-file-excel"></i> <span>Export CSV</span>
+      <div
+        class="history-header-row"
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin: 25px 0 15px;
+        "
+      >
+        <span
+          class="history-title"
+          id="lbl-trans-title"
+          style="
+            font-size: 12px;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+          "
+          >Transactions</span
+        >
+        <button
+          class="btn-download-modern"
+          onclick="exportCSV()"
+          style="
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          "
+        >
+          <i class="fa-solid fa-file-excel"></i>
+          <span id="lbl-export">Export</span>
         </button>
       </div>
 
@@ -210,58 +259,111 @@
       let currentLang = localStorage.getItem("selectedLang") || "mm";
       let activeTypeFilter = null;
 
+      const catIcons = {
+        Salary: "fa-wallet",
+        Bonus: "fa-gift",
+        Gifts: "fa-hand-holding-heart",
+        Investment: "fa-chart-line",
+        Other: "fa-plus",
+        Food: "fa-utensils",
+        Transport: "fa-car",
+        Shopping: "fa-bag-shopping",
+        Rent: "fa-house",
+        Health: "fa-heart-pulse",
+        Bills: "fa-credit-card",
+        General: "fa-tags",
+      };
+
       const langData = {
         mm: {
-          back: "Dashboard",
+          back: "ပင်မစာမျက်နှာ",
           inc: "ဝင်ငွေ",
           exp: "အသုံးစရိတ်",
+          bal: "စုစုပေါင်း ပမာဏ",
           empty: "မှတ်တမ်းမရှိပါ။",
           confirm: "ဖျက်မှာ သေချာပါသလား?",
+          trans: "စာရင်းမှတ်တမ်းများ",
+          export: "Excel ထုတ်ရန်",
+          editNotePrompt: "မှတ်စုကို ပြင်ဆင်ရန်:",
+          searchPlaceholder: "မှတ်စု ဖြင့် ရှာပါ",
+          Salary: "လစာ",
+          Bonus: "ဆုကြေး",
+          Gifts: "လက်ဆောင်",
+          Investment: "ရင်းနှီးမြှုပ်နှံမှု",
+          Other: "အခြား",
+          Food: "စားစရိတ်",
+          Transport: "ခရီးစရိတ်",
+          Shopping: "ဝယ်ယူမှု",
+          Rent: "အိမ်လခ",
+          Health: "ကျန်းမာရေး",
+          Bills: "မီတာ/ဘေလ်",
+          General: "အထွေထွေ",
         },
         en: {
           back: "Dashboard",
           inc: "Income",
           exp: "Expense",
+          bal: "Total Amount",
           empty: "No records found.",
           confirm: "Delete this record?",
+          trans: "Transactions",
+          export: "Export CSV",
+          editNotePrompt: "Edit Note:",
+          searchPlaceholder: "Search by notes...",
+          Salary: "Salary",
+          Bonus: "Bonus",
+          Gifts: "Gifts",
+          Investment: "Invest",
+          Other: "Other",
+          Food: "Food",
+          Transport: "Transport",
+          Shopping: "Shopping",
+          Rent: "Rent",
+          Health: "Health",
+          Bills: "Bills",
+          General: "General",
         },
       };
 
       function handleSearch(input) {
-        const clearBtn = document.getElementById("clear-search");
-        clearBtn.style.display = input.value ? "block" : "none";
+        document.getElementById("clear-search").style.display = input.value
+          ? "block"
+          : "none";
         filterData();
       }
 
       function clearSearch() {
-        const input = document.getElementById("search-bar");
-        input.value = "";
+        document.getElementById("search-bar").value = "";
         document.getElementById("clear-search").style.display = "none";
         filterData();
       }
 
       function toggleDarkMode() {
-        const currentTheme =
-          document.documentElement.getAttribute("data-theme");
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-        updateThemeIcon(newTheme);
-      }
-
-      function updateThemeIcon(theme) {
-        const icon = document.querySelector(".theme-toggle i");
-        if (icon)
-          icon.className =
-            theme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
+        const target =
+          document.documentElement.getAttribute("data-theme") === "dark"
+            ? "light"
+            : "dark";
+        document.documentElement.setAttribute("data-theme", target);
+        localStorage.setItem("theme", target);
+        document.getElementById("theme-icon").className =
+          target === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
       }
 
       function changeLang(lang) {
         currentLang = lang;
         localStorage.setItem("selectedLang", lang);
+
         document.getElementById("lbl-back").innerText = langData[lang].back;
         document.getElementById("lbl-inc").innerText = langData[lang].inc;
         document.getElementById("lbl-exp").innerText = langData[lang].exp;
+        document.getElementById("lbl-total-amount").innerText =
+          langData[lang].bal;
+        document.getElementById("lbl-trans-title").innerText =
+          langData[lang].trans;
+        document.getElementById("lbl-export").innerText = langData[lang].export;
+        document.getElementById("search-bar").placeholder =
+          langData[lang].searchPlaceholder;
+
         document
           .querySelectorAll(".lang-btn")
           .forEach((b) => b.classList.toggle("active", b.id === `btn-${lang}`));
@@ -277,7 +379,6 @@
         document.getElementById("date-from").value = "";
         document.getElementById("date-to").value = "";
         document.getElementById("search-bar").value = "";
-        document.getElementById("clear-search").style.display = "none";
         activeTypeFilter = null;
         loadFullHistory();
       }
@@ -286,22 +387,17 @@
         const {
           data: { user },
         } = await _supabase.auth.getUser();
-        if (!user) {
-          window.location.href = "index.html";
-          return;
-        }
+        if (!user) return (window.location.href = "index.html");
 
         let query = _supabase
           .from("transactions")
           .select("*")
           .order("date", { ascending: false });
+        const df = document.getElementById("date-from").value;
+        const dt = document.getElementById("date-to").value;
 
-        const dateFrom = document.getElementById("date-from").value;
-        const dateTo = document.getElementById("date-to").value;
-
-        if (dateFrom) query = query.gte("date", dateFrom);
-        if (dateTo) query = query.lte("date", dateTo);
-
+        if (df) query = query.gte("date", df);
+        if (dt) query = query.lte("date", dt);
         if (activeTypeFilter === "income") query = query.eq("type", "Income");
         if (activeTypeFilter === "expense") query = query.eq("type", "Expense");
 
@@ -314,24 +410,29 @@
       }
 
       function updateFilterUI() {
-        document
-          .getElementById("card-inc")
-          .classList.toggle("active-filter", activeTypeFilter === "income");
-        document
-          .getElementById("card-exp")
-          .classList.toggle("active-filter", activeTypeFilter === "expense");
+        document.getElementById("card-inc").style.borderColor =
+          activeTypeFilter === "income" ? "#10b981" : "rgba(0,0,0,0.05)";
+        document.getElementById("card-exp").style.borderColor =
+          activeTypeFilter === "expense" ? "#ef4444" : "rgba(0,0,0,0.05)";
+      }
+
+      async function editNote(id, currentNote) {
+        const newNote = prompt(
+          langData[currentLang].editNotePrompt,
+          currentNote || "",
+        );
+        if (newNote !== null) {
+          const { error } = await _supabase
+            .from("transactions")
+            .update({ notes: newNote })
+            .eq("id", id);
+          if (!error) loadFullHistory();
+        }
       }
 
       function renderList(data) {
         const listDiv = document.getElementById("full-history-list");
         listDiv.innerHTML = "";
-
-        if (data.length === 0) {
-          listDiv.innerHTML = `<div style="text-align:center; padding:60px; color:var(--text-sub); font-size:14px;">${langData[currentLang].empty}</div>`;
-          document.getElementById("stat-inc").innerText = "0";
-          document.getElementById("stat-exp").innerText = "0";
-          return;
-        }
 
         let tInc = 0,
           tExp = 0,
@@ -341,40 +442,53 @@
           if (item.type === "Income") tInc += item.amount;
           else tExp += item.amount;
 
-          const dateObj = new Date(item.date);
-          const monthName = dateObj.toLocaleString(
+          const monthName = new Date(item.date).toLocaleString(
             currentLang === "mm" ? "my-MM" : "en-US",
             { month: "long", year: "numeric" },
           );
-
           if (monthName !== lastMonth) {
             listDiv.innerHTML += `<div class="month-group-label">${monthName}</div>`;
             lastMonth = monthName;
           }
 
           const isInc = item.type === "Income";
+          const icon = catIcons[item.category] || "fa-receipt";
+
           listDiv.innerHTML += `
             <div class="transaction-item">
-              <div style="display: flex; align-items: center; gap: 16px;">
-                <div class="icon-circle ${isInc ? "inc-icon" : "exp-icon"}">
-                  <i class="fa-solid ${isInc ? "fa-plus" : "fa-minus"}"></i>
-                </div>
-                <div>
-                  <span class="info-cat">${item.category}</span>
-                  <span class="info-date">${item.date}</span>
-                </div>
+              <div class="icon-circle ${isInc ? "inc-icon" : "exp-icon"}">
+                <i class="fa-solid ${icon}"></i>
               </div>
-              <div style="text-align: right;">
-                <span style="font-weight: 800; font-size: 17px; color: ${isInc ? "#22c55e" : "#ef4444"}">
+              <div class="item-middle">
+                <span style="font-weight:700; font-size:15px; display:block;">${langData[currentLang][item.category] || item.category}</span>
+                <div class="note-bubble" onclick="editNote(${item.id}, '${item.notes || ""}')" title="Click to edit">
+                  <i class="fa-solid fa-pen-to-square" style="font-size:10px; opacity:0.5; margin-right:5px;"></i>
+                  ${item.notes || "..."}
+                </div>
+                <span style="font-size:11px; color:#94a3b8; font-weight:500;">${item.date}</span>
+              </div>
+              <div style="text-align: right; display: flex; flex-direction: column; justify-content: space-between;">
+                <div style="font-weight: 800; font-size: 16px; color: ${isInc ? "#10b981" : "#ef4444"}">
                   ${isInc ? "+" : "-"} ${item.amount.toLocaleString()}
-                </span>
-                <button class="btn-del" onclick="deleteItem(${item.id})"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+                <button class="btn-del" onclick="deleteItem(${item.id})" style="background:none; border:none; cursor:pointer; color:#ef4444; opacity:0.6;">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
               </div>
             </div>`;
         });
 
+        const netBal = tInc - tExp;
         document.getElementById("stat-inc").innerText = tInc.toLocaleString();
         document.getElementById("stat-exp").innerText = tExp.toLocaleString();
+
+        const balEl = document.getElementById("stat-bal");
+        balEl.innerText = netBal.toLocaleString();
+        balEl.style.color = netBal < 0 ? "#ef4444" : "#3b82f6";
+
+        if (data.length === 0) {
+          listDiv.innerHTML = `<div style="text-align:center; padding:60px; color:#94a3b8; font-size:14px;">${langData[currentLang].empty}</div>`;
+        }
       }
 
       function filterData() {
@@ -410,14 +524,15 @@
         const blob = new Blob([csv], { type: "text/csv" });
         const a = document.createElement("a");
         a.href = window.URL.createObjectURL(blob);
-        a.download = `History.csv`;
+        a.download = `History_Export.csv`;
         a.click();
       }
 
       window.onload = () => {
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
-        updateThemeIcon(savedTheme);
+        document.getElementById("theme-icon").className =
+          savedTheme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
         changeLang(currentLang);
         loadFullHistory();
       };
