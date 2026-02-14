@@ -17,251 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="dashboard.css" />
-
-    <style>
-      :root {
-        --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        --card-shadow:
-          0 10px 15px -3px rgba(0, 0, 0, 0.1),
-          0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-
-      body {
-        background-color: #f8fafc;
-        font-family: "Inter", sans-serif;
-      }
-      .history-container {
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 0 16px;
-      }
-
-      .top-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-      }
-      .back-nav {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        color: #475569;
-        font-weight: 600;
-        padding: 8px 12px;
-        border-radius: 12px;
-        transition: 0.2s;
-        background: white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-      .back-nav:hover {
-        background: #f1f5f9;
-        transform: translateX(-4px);
-      }
-
-      .lang-switcher {
-        display: flex;
-        background: #e2e8f0;
-        padding: 4px;
-        border-radius: 10px;
-        gap: 4px;
-      }
-      .lang-btn {
-        border: none;
-        padding: 6px 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 700;
-        background: transparent;
-        color: #64748b;
-        transition: 0.3s;
-      }
-      .lang-btn.active {
-        background: white;
-        color: #4f46e5;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .overview-card {
-        background: var(--primary-gradient);
-        color: white;
-        padding: 24px;
-        border-radius: 24px;
-        margin-bottom: 24px;
-        box-shadow: var(--card-shadow);
-        display: flex;
-        justify-content: space-around;
-        text-align: center;
-      }
-      .stat-item {
-        flex: 1;
-        cursor: pointer;
-        transition: 0.3s;
-        border-radius: 16px;
-        padding: 10px;
-      }
-      .stat-item:hover {
-        background: rgba(255, 255, 255, 0.1);
-      }
-      .stat-item.active-filter {
-        background: rgba(255, 255, 255, 0.2);
-        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-      }
-      .stat-item h4 {
-        font-size: 13px;
-        opacity: 0.8;
-        margin-bottom: 8px;
-        font-weight: 400;
-      }
-      .stat-item .amount {
-        font-size: 22px;
-        font-weight: 700;
-      }
-
-      .filter-bar {
-        background: white;
-        padding: 16px;
-        border-radius: 20px;
-        box-shadow: var(--card-shadow);
-        margin-bottom: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      .search-box {
-        position: relative;
-      }
-      .search-box i {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-      }
-      .search-box input {
-        width: 100%;
-        padding: 12px 12px 12px 42px !important;
-        border-radius: 14px !important;
-        border: 1px solid #e2e8f0 !important;
-        background: #f8fafc !important;
-        font-size: 14px;
-      }
-      .filter-row {
-        display: flex;
-        gap: 12px;
-      }
-      .filter-row input[type="date"] {
-        flex: 1;
-        padding: 10px !important;
-        border-radius: 12px !important;
-        border: 1px solid #e2e8f0 !important;
-        background: #f8fafc !important;
-      }
-      .export-btn {
-        background: #1e293b;
-        color: white;
-        border: none;
-        padding: 10px 16px;
-        border-radius: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .history-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      .transaction-item {
-        background: white;
-        padding: 16px;
-        border-radius: 18px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: 0.3s;
-        border: 1px solid transparent;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      }
-      .transaction-item:hover {
-        border-color: #e2e8f0;
-        transform: translateY(-2px);
-        box-shadow: var(--card-shadow);
-      }
-      .item-main {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-      .icon-circle {
-        width: 48px;
-        height: 48px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-      }
-      .inc-icon {
-        background: #dcfce7;
-        color: #16a34a;
-      }
-      .exp-icon {
-        background: #fee2e2;
-        color: #dc2626;
-      }
-      .info-cat {
-        font-weight: 700;
-        color: #1e293b;
-        font-size: 15px;
-        display: block;
-      }
-      .info-date {
-        font-size: 12px;
-        color: #64748b;
-      }
-      .info-note {
-        font-size: 13px;
-        color: #94a3b8;
-        font-style: italic;
-        margin-top: 2px;
-      }
-      .item-amount {
-        text-align: right;
-      }
-      .amt-val {
-        font-weight: 800;
-        font-size: 16px;
-        display: block;
-      }
-      .btn-del {
-        background: #fff1f2;
-        color: #f43f5e;
-        border: none;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: 0.2s;
-        margin-top: 6px;
-      }
-      .btn-del:hover {
-        background: #f43f5e;
-        color: white;
-      }
-      .empty-state {
-        text-align: center;
-        padding: 60px 0;
-        color: #94a3b8;
-      }
-    </style>
+    <link rel="stylesheet" href="history.css" />
   </head>
   <body>
     <div class="history-container">
@@ -269,42 +25,62 @@
         <div class="back-nav" onclick="window.location.href = 'dashboard.html'">
           <i class="fa-solid fa-arrow-left"></i> <span id="lbl-back">Back</span>
         </div>
-        <div class="lang-switcher">
-          <button class="lang-btn" id="btn-en" onclick="changeLang('en')">
-            EN
+        <div class="header-right">
+          <button class="theme-toggle" onclick="toggleDarkMode()">
+            <i class="fa-solid fa-moon"></i>
           </button>
-          <button class="lang-btn" id="btn-mm" onclick="changeLang('mm')">
-            မြန်မာ
-          </button>
+          <div class="lang-switcher">
+            <button class="lang-btn" id="btn-en" onclick="changeLang('en')">
+              EN
+            </button>
+            <button class="lang-btn" id="btn-mm" onclick="changeLang('mm')">
+              MM
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="overview-card" id="stats-card" style="display: none">
-        <div class="stat-item" id="card-inc" onclick="toggleFilter('income')">
+      <div class="overview-card">
+        <button class="stat-btn" id="card-inc" onclick="toggleFilter('income')">
           <h4 id="lbl-inc">Income</h4>
           <div class="amount" id="stat-inc">0</div>
-        </div>
-        <div style="width: 1px; background: rgba(255, 255, 255, 0.2)"></div>
-        <div class="stat-item" id="card-exp" onclick="toggleFilter('expense')">
+        </button>
+        <button
+          class="stat-btn"
+          id="card-exp"
+          onclick="toggleFilter('expense')"
+        >
           <h4 id="lbl-exp">Expense</h4>
           <div class="amount" id="stat-exp">0</div>
-        </div>
+        </button>
       </div>
 
       <div class="filter-bar">
         <div class="search-box">
           <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="search-bar" onkeyup="filterData()" />
+          <input
+            type="text"
+            id="search-bar"
+            onkeyup="handleSearch(this)"
+            placeholder="Search category or notes..."
+          />
+          <button
+            id="clear-search"
+            class="btn-clear-search"
+            onclick="clearSearch()"
+          >
+            <i class="fa-solid fa-circle-xmark"></i>
+          </button>
         </div>
-        <div class="filter-row">
+        <div class="filter-row-bottom">
           <input type="date" id="filter-date" onchange="loadFullHistory()" />
-          <button class="export-btn" onclick="exportCSV()" id="lbl-export">
-            <i class="fa-solid fa-file-export"></i> Export
+          <button class="btn-download-modern" onclick="exportCSV()">
+            <i class="fa-solid fa-download"></i>
           </button>
         </div>
       </div>
 
-      <div id="full-history-list" class="history-list"></div>
+      <div id="full-history-list"></div>
     </div>
 
     <script>
@@ -313,36 +89,60 @@
       const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
       let allData = [];
-      let currentLang = "mm";
-      let activeTypeFilter = null; // 'income', 'expense' သို့မဟုတ် null
+      let currentLang = localStorage.getItem("selectedLang") || "mm";
+      let activeTypeFilter = null;
 
       const langData = {
         mm: {
-          back: "Dashboard သို့ပြန်သွားရန်",
-          search: "ခေါင်းစဉ် သို့မဟုတ် မှတ်စုဖြင့် ရှာဖွေရန်...",
-          inc: "စုစုပေါင်းဝင်ငွေ",
-          exp: "စုစုပေါင်းအသုံးစရိတ်",
-          empty: "မှတ်တမ်းမရှိသေးပါ။",
-          confirm: "ဤမှတ်တမ်းကို ဖျက်လိုပါသလား?",
-          export: "Export",
+          back: "Dashboard",
+          inc: "ဝင်ငွေ",
+          exp: "အသုံးစရိတ်",
+          empty: "မှတ်တမ်းမရှိပါ။",
+          confirm: "ဖျက်မှာ သေချာပါသလား?",
         },
         en: {
           back: "Dashboard",
-          search: "Search categories or notes...",
-          inc: "Total Income",
-          exp: "Total Expense",
+          inc: "Income",
+          exp: "Expense",
           empty: "No records found.",
           confirm: "Delete this record?",
-          export: "Export",
         },
       };
+
+      // --- Search UI Logic ---
+      function handleSearch(input) {
+        const clearBtn = document.getElementById("clear-search");
+        clearBtn.style.display = input.value ? "block" : "none";
+        filterData();
+      }
+
+      function clearSearch() {
+        const input = document.getElementById("search-bar");
+        input.value = "";
+        document.getElementById("clear-search").style.display = "none";
+        filterData();
+      }
+
+      // --- Theme Logic ---
+      function toggleDarkMode() {
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+        updateThemeIcon(newTheme);
+      }
+
+      function updateThemeIcon(theme) {
+        const icon = document.querySelector(".theme-toggle i");
+        icon.className =
+          theme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
+      }
 
       function changeLang(lang) {
         currentLang = lang;
         localStorage.setItem("selectedLang", lang);
         document.getElementById("lbl-back").innerText = langData[lang].back;
-        document.getElementById("search-bar").placeholder =
-          langData[lang].search;
         document.getElementById("lbl-inc").innerText = langData[lang].inc;
         document.getElementById("lbl-exp").innerText = langData[lang].exp;
         document
@@ -351,19 +151,8 @@
         renderList(allData);
       }
 
-      // Filter ကို Toggle လုပ်မည့် Function
       function toggleFilter(type) {
-        if (activeTypeFilter === type) {
-          activeTypeFilter = null; // တူညီတာကို ထပ်နှိပ်ရင် Filter ဖြုတ်မယ်
-        } else {
-          activeTypeFilter = type; // မတူတာနှိပ်ရင် Filter အသစ်ပြောင်းမယ်
-        }
-
-        // URL မှာ parameter ရှိနေရင် ဖယ်ရှားပေးခြင်း (Optional - UI သန့်ရှင်းစေရန်)
-        const url = new URL(window.location);
-        url.searchParams.delete("filter");
-        window.history.replaceState({}, "", url);
-
+        activeTypeFilter = activeTypeFilter === type ? null : type;
         loadFullHistory();
       }
 
@@ -376,22 +165,12 @@
           return;
         }
 
-        // ပထမဆုံးအကြိမ် Dashboard ကလာလျှင် URL က parameter ကိုယူသည်
-        const urlParams = new URLSearchParams(window.location.search);
-        const typeParam = urlParams.get("filter");
-
-        if (typeParam && activeTypeFilter === null) {
-          activeTypeFilter = typeParam;
-        }
-
         let query = _supabase
           .from("transactions")
           .select("*")
           .order("date", { ascending: false });
-
         const filterDate = document.getElementById("filter-date").value;
         if (filterDate) query = query.eq("date", filterDate);
-
         if (activeTypeFilter === "income") query = query.eq("type", "Income");
         if (activeTypeFilter === "expense") query = query.eq("type", "Expense");
 
@@ -414,44 +193,53 @@
 
       function renderList(data) {
         const listDiv = document.getElementById("full-history-list");
-        const statsCard = document.getElementById("stats-card");
         listDiv.innerHTML = "";
 
         if (data.length === 0) {
-          statsCard.style.display = activeTypeFilter ? "flex" : "none";
-          listDiv.innerHTML = `<div class="empty-state"><i class="fa-solid fa-folder-open" style="font-size: 40px; margin-bottom: 10px;"></i><p>${langData[currentLang].empty}</p></div>`;
+          listDiv.innerHTML = `<div style="text-align:center; padding:60px; color:var(--text-sub); font-size:14px;">${langData[currentLang].empty}</div>`;
           return;
         }
 
-        statsCard.style.display = "flex";
         let tInc = 0,
-          tExp = 0;
+          tExp = 0,
+          lastMonth = "";
 
         data.forEach((item) => {
-          const isInc = item.type === "Income";
-          if (isInc) tInc += item.amount;
+          if (item.type === "Income") tInc += item.amount;
           else tExp += item.amount;
 
+          const dateObj = new Date(item.date);
+          const monthName = dateObj.toLocaleString(
+            currentLang === "mm" ? "my-MM" : "en-US",
+            { month: "long", year: "numeric" },
+          );
+
+          if (monthName !== lastMonth) {
+            listDiv.innerHTML += `<div class="month-group-label">${monthName}</div>`;
+            lastMonth = monthName;
+          }
+
+          const isInc = item.type === "Income";
           listDiv.innerHTML += `
             <div class="transaction-item">
-              <div class="item-main">
+              <div style="display: flex; align-items: center; gap: 16px;">
                 <div class="icon-circle ${isInc ? "inc-icon" : "exp-icon"}">
-                  <i class="fa-solid ${isInc ? "fa-arrow-up" : "fa-arrow-down"}"></i>
+                  <i class="fa-solid ${isInc ? "fa-plus" : "fa-minus"}"></i>
                 </div>
                 <div>
                   <span class="info-cat">${item.category}</span>
-                  <span class="info-date"><i class="fa-regular fa-calendar"></i> ${item.date}</span>
-                  ${item.notes ? `<div class="info-note">${item.notes}</div>` : ""}
+                  <span class="info-date">${item.date}</span>
                 </div>
               </div>
-              <div class="item-amount">
-                <span class="amt-val" style="color: ${isInc ? "#16a34a" : "#dc2626"}">
+              <div style="text-align: right;">
+                <span style="font-weight: 800; font-size: 17px; color: ${isInc ? "#22c55e" : "#ef4444"}">
                   ${isInc ? "+" : "-"} ${item.amount.toLocaleString()}
                 </span>
-                <button class="btn-del" onclick="deleteItem(${item.id})"><i class="fa-solid fa-trash"></i></button>
+                <button class="btn-del" onclick="deleteItem(${item.id})"><i class="fa-solid fa-trash-can"></i></button>
               </div>
             </div>`;
         });
+
         document.getElementById("stat-inc").innerText = tInc.toLocaleString();
         document.getElementById("stat-exp").innerText = tExp.toLocaleString();
       }
@@ -468,8 +256,11 @@
 
       async function deleteItem(id) {
         if (confirm(langData[currentLang].confirm)) {
-          await _supabase.from("transactions").delete().eq("id", id);
-          loadFullHistory();
+          const { error } = await _supabase
+            .from("transactions")
+            .delete()
+            .eq("id", id);
+          if (!error) loadFullHistory();
         }
       }
 
@@ -486,14 +277,15 @@
         const blob = new Blob([csv], { type: "text/csv" });
         const a = document.createElement("a");
         a.href = window.URL.createObjectURL(blob);
-        a.download = `History_${new Date().toISOString().split("T")[0]}.csv`;
+        a.download = `History.csv`;
         a.click();
       }
 
       window.onload = () => {
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
-        changeLang(localStorage.getItem("selectedLang") || "mm");
+        updateThemeIcon(savedTheme);
+        changeLang(currentLang);
         loadFullHistory();
       };
     </script>

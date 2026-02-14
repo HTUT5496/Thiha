@@ -426,7 +426,20 @@
         });
       }
 
-      window.onload = () => {
+      // Updated window.onload to verify session persistence
+      window.onload = async () => {
+        // 1. Check if a session exists
+        const {
+          data: { session },
+        } = await _supabase.auth.getSession();
+
+        // 2. If no session, redirect to login page
+        if (!session) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        // 3. If session exists, setup existing logic
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
         document.getElementById("theme-toggle").innerText =
@@ -435,6 +448,7 @@
         changeLang(savedLang);
         document.getElementById("date").valueAsDate = new Date();
         updateCategoryOptions();
+        loadData(); // This now runs safely knowing session exists
       };
     </script>
   </body>
