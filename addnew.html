@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="my">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Add Transaction</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="addnew.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="top-nav">
+        <div class="nav-left">
+          <button class="btn-nav" id="btnBack">
+            <i class="fa-solid fa-chevron-left"></i>
+            <span id="lbl-back">Back</span>
+          </button>
+          <button
+            class="btn-nav"
+            onclick="window.location.href = 'dashboard.html'"
+          >
+            <i class="fa-solid fa-house"></i>
+          </button>
+        </div>
+
+        <div class="nav-right">
+          <button class="btn-nav" id="theme-toggle" onclick="toggleTheme()">
+            <i class="fa-solid fa-moon" id="theme-icon"></i>
+          </button>
+          <div class="lang-switcher">
+            <button class="lang-btn" id="btn-en" onclick="changeLang('en')">
+              EN
+            </button>
+            <button class="lang-btn" id="btn-mm" onclick="changeLang('mm')">
+              MM
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="type-selector">
+        <button
+          class="type-btn active"
+          id="btn-inc"
+          data-type="Income"
+          onclick="setType('Income')"
+        >
+          Income
+        </button>
+        <button
+          class="type-btn"
+          id="btn-exp"
+          data-type="Expense"
+          onclick="setType('Expense')"
+        >
+          Expense
+        </button>
+      </div>
+
+      <div class="category-grid" id="categoryGrid"></div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i id="modalIcon" class="fa-solid"></i>
+            <h3 id="modalTitle">Category</h3>
+          </div>
+          <button class="close-modal" onclick="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="txForm">
+          <div class="form-group">
+            <label id="lbl-amt">Amount</label>
+            <input type="number" id="amount" placeholder="0" required />
+          </div>
+          <div class="form-group">
+            <label id="lbl-date">Date</label>
+            <input type="date" id="date" required />
+          </div>
+          <div class="form-group">
+            <label id="lbl-note">Note</label>
+            <textarea id="notes" rows="2" placeholder="..."></textarea>
+          </div>
+          <button type="submit" class="btn-save" id="btnSave">
+            <div class="spinner" id="loader"></div>
+            <span id="btnText">Save</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const supabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
+      const supabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
+      const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+      let selectedType = "Income";
+      let activeCategory = "";
+      let currentLang = localStorage.getItem("selectedLang") || "mm";
+
+      const langData = {
+        mm: {
+          back: "Back",
+          home: "ပင်မ",
+          inc: "ဝင်ငွေ",
+          exp: "အသုံးစရိတ်",
+          amt: "ပမာဏ",
+          date: "ရက်စွဲ",
+          note: "မှတ်စု",
+          save: "သိမ်းမည်",
+          saving: "သိမ်းနေသည်...",
+          Salary: "လစာ",
+          Bonus: "ဆုကြေး",
+          Gifts: "လက်ဆောင်",
+          Invest: "ရင်းနှီးမြှုပ်နှံမှု",
+          Other: "အခြား",
+          Food: "စားစရိတ်",
+          Transport: "ခရီးစရိတ်",
+          Shopping: "ဝယ်ယူမှု",
+          Rent: "အိမ်လခ",
+          Health: "ကျန်းမာရေး",
+          Bills: "မီတာ/ဘေလ်",
+          General: "အထွေထွေ",
+        },
+        en: {
+          back: "Back",
+          home: "Home",
+          inc: "Income",
+          exp: "Expense",
+          amt: "Amount",
+          date: "Date",
+          note: "Note",
+          save: "Save",
+          saving: "Saving...",
+          Salary: "Salary",
+          Bonus: "Bonus",
+          Gifts: "Gifts",
+          Invest: "Invest",
+          Other: "Other",
+          Food: "Food",
+          Transport: "Transport",
+          Shopping: "Shopping",
+          Rent: "Rent",
+          Health: "Health",
+          Bills: "Bills",
+          General: "General",
+        },
+      };
+
+      const categories = {
+        Income: [
+          { id: "Salary", icon: "fa-wallet", color: "#10b981" },
+          { id: "Bonus", icon: "fa-gift", color: "#10b981" },
+          { id: "Gifts", icon: "fa-hand-holding-heart", color: "#10b981" },
+          { id: "Invest", icon: "fa-chart-line", color: "#10b981" },
+          { id: "Other", icon: "fa-plus", color: "#10b981" },
+        ],
+        Expense: [
+          { id: "Food", icon: "fa-utensils", color: "#ef4444" },
+          { id: "Transport", icon: "fa-car", color: "#ef4444" },
+          { id: "Shopping", icon: "fa-bag-shopping", color: "#ef4444" },
+          { id: "Rent", icon: "fa-house", color: "#ef4444" },
+          { id: "Health", icon: "fa-heart-pulse", color: "#ef4444" },
+          { id: "Bills", icon: "fa-credit-card", color: "#ef4444" },
+          { id: "General", icon: "fa-tags", color: "#ef4444" },
+        ],
+      };
+
+      // --- Navigation Logic ---
+      document.getElementById("btnBack").onclick = function () {
+        // If there's no history to go back to (e.g. opened in new tab), go to history.html
+        if (window.history.length <= 1) {
+          window.location.href = "history.html";
+        } else {
+          window.history.back();
+        }
+      };
+
+      // --- Language & Theme Logic ---
+      function changeLang(lang) {
+        currentLang = lang;
+        localStorage.setItem("selectedLang", lang);
+        applyLanguage();
+      }
+
+      function applyLanguage() {
+        const d = langData[currentLang];
+        document.getElementById("lbl-back").innerText = d.back;
+        document.getElementById("btn-inc").innerText = d.inc;
+        document.getElementById("btn-exp").innerText = d.exp;
+        document.getElementById("lbl-amt").innerText = d.amt;
+        document.getElementById("lbl-date").innerText = d.date;
+        document.getElementById("lbl-note").innerText = d.note;
+        document.getElementById("btnText").innerText = d.save;
+        document
+          .getElementById("btn-en")
+          .classList.toggle("active", currentLang === "en");
+        document
+          .getElementById("btn-mm")
+          .classList.toggle("active", currentLang === "mm");
+        renderGrid();
+      }
+
+      function toggleTheme() {
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme") === "dark"
+            ? "light"
+            : "dark";
+        document.documentElement.setAttribute("data-theme", currentTheme);
+        localStorage.setItem("theme", currentTheme);
+        updateThemeIcon();
+      }
+
+      function updateThemeIcon() {
+        const theme = document.documentElement.getAttribute("data-theme");
+        const icon = document.getElementById("theme-icon");
+        if (icon) {
+          icon.className =
+            theme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
+        }
+      }
+
+      // --- Page Logic ---
+      function setType(type) {
+        selectedType = type;
+        document
+          .querySelectorAll(".type-btn")
+          .forEach((btn) =>
+            btn.classList.toggle("active", btn.dataset.type === type),
+          );
+        renderGrid();
+      }
+
+      function renderGrid() {
+        const grid = document.getElementById("categoryGrid");
+        grid.innerHTML = categories[selectedType]
+          .map(
+            (cat) => `
+            <div class="cat-card" onclick="openModal('${cat.id}', '${cat.icon}', '${cat.color}')">
+                <i class="fa-solid ${cat.icon}" style="color: ${cat.color}"></i>
+                <span>${langData[currentLang][cat.id] || cat.id}</span>
+            </div>
+        `,
+          )
+          .join("");
+      }
+
+      function openModal(id, icon, color) {
+        activeCategory = id;
+        document.getElementById("modalTitle").innerText =
+          langData[currentLang][id] || id;
+        const iconEl = document.getElementById("modalIcon");
+        iconEl.className = `fa-solid ${icon}`;
+        iconEl.style.color = color;
+        document.getElementById("modalOverlay").classList.add("active");
+
+        // Timeout to ensure focus happens after modal transition
+        setTimeout(() => {
+          document.getElementById("amount").focus();
+        }, 300);
+      }
+
+      function closeModal() {
+        document.getElementById("modalOverlay").classList.remove("active");
+        document.getElementById("txForm").reset();
+        document.getElementById("date").valueAsDate = new Date();
+      }
+
+      window.onclick = (e) => {
+        if (e.target == document.getElementById("modalOverlay")) closeModal();
+      };
+
+      // --- Initialize ---
+      const savedTheme = localStorage.getItem("theme") || "dark";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+      updateThemeIcon();
+      document.getElementById("date").valueAsDate = new Date();
+      applyLanguage();
+      setType("Income");
+
+      document.getElementById("txForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const btnSave = document.getElementById("btnSave");
+        btnSave.disabled = true;
+        document.getElementById("loader").style.display = "block";
+        document.getElementById("btnText").innerText =
+          langData[currentLang].saving;
+
+        try {
+          const {
+            data: { user },
+          } = await _supabase.auth.getUser();
+
+          if (!user) throw new Error("User not authenticated");
+
+          const { error } = await _supabase.from("transactions").insert([
+            {
+              user_id: user.id,
+              amount: parseFloat(document.getElementById("amount").value),
+              category: activeCategory,
+              date: document.getElementById("date").value,
+              notes: document.getElementById("notes").value,
+              type: selectedType,
+            },
+          ]);
+          if (error) throw error;
+          window.location.href = "history.html";
+        } catch (err) {
+          alert(err.message);
+          btnSave.disabled = false;
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("btnText").innerText =
+            langData[currentLang].save;
+        }
+      };
+    </script>
+  </body>
+</html>

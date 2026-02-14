@@ -25,39 +25,13 @@
         <button
           class="btn-dashboard"
           onclick="window.location.href = 'dashboard.html'"
-          style="
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-glass);
-            padding: 8px 15px;
-            border-radius: 12px;
-            cursor: pointer;
-            color: inherit;
-            font-family: inherit;
-            font-weight: 600;
-          "
         >
-          <i
-            class="fa-solid fa-house"
-            style="color: var(--primary); font-size: 14px"
-          ></i>
+          <i class="fa-solid fa-house"></i>
           <span id="lbl-back">Back</span>
         </button>
 
         <div class="header-right">
-          <button
-            class="theme-toggle"
-            onclick="toggleDarkMode()"
-            style="
-              background: none;
-              border: none;
-              cursor: pointer;
-              font-size: 18px;
-              color: inherit;
-            "
-          >
+          <button class="theme-toggle" onclick="toggleDarkMode()">
             <i class="fa-solid fa-moon" id="theme-icon"></i>
           </button>
           <div class="lang-switcher">
@@ -72,75 +46,22 @@
       </div>
 
       <div class="balance-card">
-        <small
-          id="lbl-total-amount"
-          style="
-            color: #94a3b8;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 11px;
-          "
-          >Total Amount</small
-        >
+        <small id="lbl-total-amount">Total Amount</small>
         <div class="amount" id="stat-bal">0</div>
       </div>
 
-      <div
-        class="overview-grid"
-        style="
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-          margin-bottom: 20px;
-        "
-      >
-        <button
-          class="stat-btn"
-          id="card-inc"
-          onclick="toggleFilter('income')"
-          style="
-            background: var(--card-bg);
-            border: 1px solid var(--border-glass);
-            border-radius: 20px;
-            padding: 15px;
-            cursor: pointer;
-            color: inherit;
-          "
-        >
-          <h4 id="lbl-inc" style="font-size: 11px; color: #94a3b8; margin: 0">
-            Income
-          </h4>
-          <div
-            class="amount"
-            id="stat-inc"
-            style="color: #10b981; font-weight: 800; font-size: 18px"
-          >
-            0
-          </div>
+      <div class="overview-grid">
+        <button class="stat-btn" id="card-inc" onclick="toggleFilter('income')">
+          <h4 id="lbl-inc">Income</h4>
+          <div class="amount" id="stat-inc">0</div>
         </button>
         <button
           class="stat-btn"
           id="card-exp"
           onclick="toggleFilter('expense')"
-          style="
-            background: var(--card-bg);
-            border: 1px solid var(--border-glass);
-            border-radius: 20px;
-            padding: 15px;
-            cursor: pointer;
-            color: inherit;
-          "
         >
-          <h4 id="lbl-exp" style="font-size: 11px; color: #94a3b8; margin: 0">
-            Expense
-          </h4>
-          <div
-            class="amount"
-            id="stat-exp"
-            style="color: #ef4444; font-weight: 800; font-size: 18px"
-          >
-            0
-          </div>
+          <h4 id="lbl-exp">Expense</h4>
+          <div class="amount" id="stat-exp">0</div>
         </button>
       </div>
 
@@ -157,94 +78,36 @@
             id="clear-search"
             class="btn-clear-search"
             onclick="clearSearch()"
-            style="display: none"
           >
             <i class="fa-solid fa-circle-xmark"></i>
           </button>
         </div>
-        <div style="display: flex; gap: 8px; margin-top: 10px">
-          <input
-            type="date"
-            id="date-from"
-            onchange="loadFullHistory()"
-            style="
-              flex: 1;
-              padding: 10px;
-              border-radius: 12px;
-              border: 1px solid var(--border-glass);
-              background: var(--card-bg);
-              color: inherit;
-            "
-          />
-          <input
-            type="date"
-            id="date-to"
-            onchange="loadFullHistory()"
-            style="
-              flex: 1;
-              padding: 10px;
-              border-radius: 12px;
-              border: 1px solid var(--border-glass);
-              background: var(--card-bg);
-              color: inherit;
-            "
-          />
-          <button
-            onclick="resetFilters()"
-            style="
-              padding: 10px;
-              border-radius: 12px;
-              border: 1px solid var(--border-glass);
-              background: var(--card-bg);
-              cursor: pointer;
-              color: inherit;
-            "
-          >
+        <div class="date-filter-group">
+          <input type="date" id="date-from" onchange="loadFullHistory()" />
+          <input type="date" id="date-to" onchange="loadFullHistory()" />
+          <button class="btn-reset" onclick="resetFilters()">
             <i class="fa-solid fa-rotate-right"></i>
           </button>
         </div>
       </div>
 
-      <div
-        class="history-header-row"
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin: 25px 0 15px;
-        "
-      >
-        <span
-          class="history-title"
-          id="lbl-trans-title"
-          style="
-            font-size: 12px;
-            font-weight: 800;
-            color: #94a3b8;
-            text-transform: uppercase;
-          "
-          >Transactions</span
-        >
-        <button
-          class="btn-download-modern"
-          onclick="exportCSV()"
-          style="
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          "
-        >
-          <i class="fa-solid fa-file-excel"></i>
-          <span id="lbl-export">Export</span>
-        </button>
+      <div class="history-header-row">
+        <span class="history-title" id="lbl-trans-title">Transactions</span>
+        <div style="display: flex; gap: 8px">
+          <button
+            class="btn-download-modern"
+            style="background: var(--primary)"
+            onclick="window.location.href = 'addnew.html'"
+          >
+            <i class="fa-solid fa-plus"></i>
+            <span id="lbl-add-new">Add New</span>
+          </button>
+
+          <button class="btn-download-modern" onclick="exportCSV()">
+            <i class="fa-solid fa-file-excel"></i>
+            <span id="lbl-export">Export</span>
+          </button>
+        </div>
       </div>
 
       <div id="full-history-list"></div>
@@ -284,6 +147,7 @@
           confirm: "ဖျက်မှာ သေချာပါသလား?",
           trans: "စာရင်းမှတ်တမ်းများ",
           export: "Excel ထုတ်ရန်",
+          addNew: "အသစ်ထည့်ရန်",
           editNotePrompt: "မှတ်စုကို ပြင်ဆင်ရန်:",
           searchPlaceholder: "မှတ်စု ဖြင့် ရှာပါ",
           Salary: "လစာ",
@@ -308,6 +172,7 @@
           confirm: "Delete this record?",
           trans: "Transactions",
           export: "Export CSV",
+          addNew: "Add New",
           editNotePrompt: "Edit Note:",
           searchPlaceholder: "Search by notes...",
           Salary: "Salary",
@@ -361,6 +226,8 @@
         document.getElementById("lbl-trans-title").innerText =
           langData[lang].trans;
         document.getElementById("lbl-export").innerText = langData[lang].export;
+        document.getElementById("lbl-add-new").innerText =
+          langData[lang].addNew;
         document.getElementById("search-bar").placeholder =
           langData[lang].searchPlaceholder;
 
@@ -389,10 +256,12 @@
         } = await _supabase.auth.getUser();
         if (!user) return (window.location.href = "index.html");
 
+        // SORT BY ID DESC: Ensures most recently created or updated record stays on top
         let query = _supabase
           .from("transactions")
           .select("*")
-          .order("date", { ascending: false });
+          .order("id", { ascending: false });
+
         const df = document.getElementById("date-from").value;
         const dt = document.getElementById("date-to").value;
 
@@ -410,10 +279,17 @@
       }
 
       function updateFilterUI() {
-        document.getElementById("card-inc").style.borderColor =
-          activeTypeFilter === "income" ? "#10b981" : "rgba(0,0,0,0.05)";
-        document.getElementById("card-exp").style.borderColor =
-          activeTypeFilter === "expense" ? "#ef4444" : "rgba(0,0,0,0.05)";
+        const cardInc = document.getElementById("card-inc");
+        const cardExp = document.getElementById("card-exp");
+
+        cardInc.classList.toggle(
+          "filter-active",
+          activeTypeFilter === "income",
+        );
+        cardExp.classList.toggle(
+          "filter-active",
+          activeTypeFilter === "expense",
+        );
       }
 
       async function editNote(id, currentNote) {
@@ -460,18 +336,18 @@
                 <i class="fa-solid ${icon}"></i>
               </div>
               <div class="item-middle">
-                <span style="font-weight:700; font-size:15px; display:block;">${langData[currentLang][item.category] || item.category}</span>
+                <span class="item-category">${langData[currentLang][item.category] || item.category}</span>
                 <div class="note-bubble" onclick="editNote(${item.id}, '${item.notes || ""}')" title="Click to edit">
-                  <i class="fa-solid fa-pen-to-square" style="font-size:10px; opacity:0.5; margin-right:5px;"></i>
+                  <i class="fa-solid fa-pen-to-square"></i>
                   ${item.notes || "..."}
                 </div>
-                <span style="font-size:11px; color:#94a3b8; font-weight:500;">${item.date}</span>
+                <span class="item-date">${item.date}</span>
               </div>
-              <div style="text-align: right; display: flex; flex-direction: column; justify-content: space-between;">
-                <div style="font-weight: 800; font-size: 16px; color: ${isInc ? "#10b981" : "#ef4444"}">
+              <div class="item-right">
+                <div class="item-amount ${isInc ? "text-inc" : "text-exp"}">
                   ${isInc ? "+" : "-"} ${item.amount.toLocaleString()}
                 </div>
-                <button class="btn-del" onclick="deleteItem(${item.id})" style="background:none; border:none; cursor:pointer; color:#ef4444; opacity:0.6;">
+                <button class="btn-del" onclick="deleteItem(${item.id})">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
@@ -484,10 +360,12 @@
 
         const balEl = document.getElementById("stat-bal");
         balEl.innerText = netBal.toLocaleString();
-        balEl.style.color = netBal < 0 ? "#ef4444" : "#3b82f6";
+
+        balEl.className =
+          "amount " + (netBal < 0 ? "negative-balance" : "positive-balance");
 
         if (data.length === 0) {
-          listDiv.innerHTML = `<div style="text-align:center; padding:60px; color:#94a3b8; font-size:14px;">${langData[currentLang].empty}</div>`;
+          listDiv.innerHTML = `<div class="empty-state">${langData[currentLang].empty}</div>`;
         }
       }
 
