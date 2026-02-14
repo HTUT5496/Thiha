@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="my">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Finance Tracker - Full History</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="dashboard.css" />
+
+    <style>
+      .history-container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 0 15px;
+      }
+      .back-nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        cursor: pointer;
+        color: var(--primary);
+        font-weight: 600;
+        transition: transform 0.2s;
+      }
+      .back-nav:hover {
+        transform: translateX(-5px);
+      }
+
+      .search-box {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: center;
+      }
+      .search-box input,
+      .search-box select {
+        flex: 1;
+        min-width: 150px;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid var(--input-border);
+        background: var(--input-bg);
+        color: var(--text-dark);
+      }
+      .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .transaction-item {
+        background: var(--card-bg);
+        padding: 15px 20px;
+        border-radius: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        border: 1px solid transparent;
+        transition: 0.3s;
+      }
+      .transaction-item:hover {
+        border-color: var(--primary);
+      }
+
+      .item-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .icon-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
+      .inc-icon {
+        background: rgba(0, 200, 83, 0.1);
+        color: #00c853;
+      }
+      .exp-icon {
+        background: rgba(255, 61, 0, 0.1);
+        color: #ff3d00;
+      }
+
+      .item-info .cat {
+        font-weight: 700;
+        display: block;
+      }
+      .item-info .date {
+        font-size: 12px;
+        color: var(--text-light);
+      }
+      .item-info .note {
+        font-size: 13px;
+        color: var(--text-light);
+        font-style: italic;
+      }
+
+      .item-right {
+        text-align: right;
+      }
+      .item-amt {
+        font-weight: 700;
+        font-size: 17px;
+      }
+      .delete-btn-modern {
+        background: none;
+        border: none;
+        color: #ff3d00;
+        margin-left: 15px;
+        cursor: pointer;
+        opacity: 0.5;
+      }
+      .delete-btn-modern:hover {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="history-container">
+      <div class="back-nav" onclick="window.location.href = 'dashboard.html'">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span id="lbl-back">Dashboard သို့ပြန်သွားရန်</span>
+      </div>
+
+      <div class="search-box">
+        <input
+          type="text"
+          id="search-bar"
+          placeholder="ရှာဖွေရန်..."
+          onkeyup="filterData()"
+        />
+        <input type="date" id="filter-date" onchange="loadFullHistory()" />
+        <button
+          class="export-btn"
+          onclick="exportCSV()"
+          id="lbl-export"
+          style="
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+          "
+        >
+          Export CSV
+        </button>
+      </div>
+
+      <div id="full-history-list" class="history-list"></div>
+    </div>
+
+    <script>
+      const supabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
+      const supabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
+      const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+      let allData = [];
+
+      async function loadFullHistory() {
+        const {
+          data: { user },
+        } = await _supabase.auth.getUser();
+        if (!user) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        let query = _supabase
+          .from("transactions")
+          .select("*")
+          .order("date", { ascending: false });
+
+        const filterDate = document.getElementById("filter-date").value;
+        if (filterDate) query = query.eq("date", filterDate);
+
+        const { data, error } = await query;
+        if (data) {
+          allData = data;
+          renderList(data);
+        }
+      }
+
+      function renderList(data) {
+        const listDiv = document.getElementById("full-history-list");
+        listDiv.innerHTML = "";
+
+        if (data.length === 0) {
+          listDiv.innerHTML =
+            "<p style='text-align:center; padding: 40px;'>မှတ်တမ်းမရှိသေးပါ။</p>";
+          return;
+        }
+
+        data.forEach((item) => {
+          const isInc = item.type === "Income";
+          listDiv.innerHTML += `
+            <div class="transaction-item">
+              <div class="item-left">
+                <div class="icon-circle ${isInc ? "inc-icon" : "exp-icon"}">
+                  <i class="fa-solid ${isInc ? "fa-arrow-trend-up" : "fa-arrow-trend-down"}"></i>
+                </div>
+                <div class="item-info">
+                  <span class="cat">${item.category}</span>
+                  <span class="date">${item.date}</span>
+                  ${item.notes ? `<br><span class="note">${item.notes}</span>` : ""}
+                </div>
+              </div>
+              <div class="item-right">
+                <span class="item-amt" style="color: ${isInc ? "#00c853" : "#ff3d00"}">
+                  ${isInc ? "+" : "-"} ${item.amount.toLocaleString()}
+                </span>
+                <button class="delete-btn-modern" onclick="deleteItem(${item.id})">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      function filterData() {
+        const term = document.getElementById("search-bar").value.toLowerCase();
+        const filtered = allData.filter(
+          (i) =>
+            i.category.toLowerCase().includes(term) ||
+            (i.notes && i.notes.toLowerCase().includes(term)),
+        );
+        renderList(filtered);
+      }
+
+      async function deleteItem(id) {
+        if (confirm("ဤမှတ်တမ်းကို ဖျက်လိုပါသလား?")) {
+          await _supabase.from("transactions").delete().eq("id", id);
+          loadFullHistory();
+        }
+      }
+
+      function exportCSV() {
+        if (allData.length === 0) return alert("No data");
+        let csv = "Date,Category,Type,Amount,Notes\n";
+        allData.forEach(
+          (r) =>
+            (csv += `${r.date},${r.category},${r.type},${r.amount},"${r.notes || ""}"\n`),
+        );
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `History_${new Date().toISOString().split("T")[0]}.csv`;
+        a.click();
+      }
+
+      window.onload = () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        loadFullHistory();
+      };
+    </script>
+  </body>
+</html>

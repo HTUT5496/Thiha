@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="my">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Finance Tracker - Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="top-bar">
+        <div class="lang-switcher">
+          <button class="lang-btn" id="btn-mm" onclick="changeLang('mm')">
+            မြန်မာ
+          </button>
+          <button class="lang-btn" id="btn-en" onclick="changeLang('en')">
+            EN
+          </button>
+          <button class="lang-btn" id="theme-toggle" onclick="toggleTheme()">
+            🌙
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 10px">
+          <button
+            class="export-btn"
+            id="lbl-nav-history"
+            onclick="window.location.href = 'history.html'"
+            style="background-color: var(--primary); color: white; border: none"
+          >
+            History
+          </button>
+          <button class="logout-btn" id="lbl-logout" onclick="handleLogout()">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-card inc">
+          <i class="fa-solid fa-circle-arrow-up"></i>
+          <small id="lbl-income">ဝင်ငွေ</small>
+          <p class="amount">+ <span id="val-income">0</span></p>
+        </div>
+        <div class="summary-card exp">
+          <i class="fa-solid fa-circle-arrow-down"></i>
+          <small id="lbl-expense">အသုံးစရိတ်</small>
+          <p class="amount">- <span id="val-expense">0</span></p>
+        </div>
+        <div class="summary-card bal">
+          <i class="fa-solid fa-wallet"></i>
+          <small id="lbl-balance">လက်ကျန်</small>
+          <p class="amount"><span id="val-balance">0</span></p>
+        </div>
+      </div>
+
+      <div class="main-layout">
+        <div class="left-col">
+          <div class="card add-card">
+            <h3 id="lbl-add">စာရင်းအသစ်ထည့်ရန်</h3>
+            <div class="input-grid">
+              <input type="date" id="date" />
+              <select id="type">
+                <option value="Expense" id="opt-exp">
+                  အသုံးစရိတ် (Expense)
+                </option>
+                <option value="Income" id="opt-inc">ဝင်ငွေ (Income)</option>
+              </select>
+            </div>
+            <input
+              type="number"
+              id="amount"
+              placeholder="ပမာဏ"
+              inputmode="decimal"
+              step="any"
+            />
+            <input list="category-list" id="category" placeholder="ခေါင်းစဉ်" />
+            <datalist id="category-list"></datalist>
+            <textarea id="notes" placeholder="မှတ်စု" rows="2"></textarea>
+            <button class="main-btn" onclick="saveTransaction()" id="lbl-save">
+              စာရင်းသွင်းမည်
+            </button>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div class="card chart-card">
+            <h3 id="lbl-analysis">ခွဲခြမ်းစိတ်ဖြာမှု</h3>
+            <div class="chart-container">
+              <canvas id="expenseChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const supabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
+      const supabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
+      const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+      let currentLang = "mm";
+      let myPieChart = null;
+
+      const langData = {
+        mm: {
+          income: "ဝင်ငွေ",
+          expense: "အသုံးစရိတ်",
+          balance: "လက်ကျန်",
+          add: "စာရင်းသစ်",
+          save: "သိမ်းမည်",
+          "nav-history": "မှတ်တမ်းစာမျက်နှာ",
+          analysis: "သုံးသပ်ချက်",
+          logout: "ထွက်ရန်",
+          "place-amt": "ပမာဏ",
+          "place-cat": "ခေါင်းစဉ်",
+          "place-note": "မှတ်စု",
+          "opt-inc": "ဝင်ငွေ",
+          "opt-exp": "အသုံးစရိတ်",
+        },
+        en: {
+          income: "Income",
+          expense: "Expense",
+          balance: "Balance",
+          add: "Add New",
+          save: "Save",
+          "nav-history": "History Page",
+          analysis: "Analysis",
+          logout: "Logout",
+          "place-amt": "Amount",
+          "place-cat": "Category",
+          "place-note": "Notes",
+          "opt-inc": "Income",
+          "opt-exp": "Expense",
+        },
+      };
+
+      function toggleTheme() {
+        const doc = document.documentElement;
+        const current = doc.getAttribute("data-theme");
+        const target = current === "dark" ? "light" : "dark";
+        doc.setAttribute("data-theme", target);
+        localStorage.setItem("theme", target);
+        document.getElementById("theme-toggle").innerText =
+          target === "dark" ? "☀️" : "🌙";
+        loadData(); // Reload for chart colors
+      }
+
+      function changeLang(lang) {
+        currentLang = lang;
+        localStorage.setItem("selectedLang", lang);
+        Object.keys(langData[lang]).forEach((key) => {
+          const el = document.getElementById(`lbl-${key}`);
+          if (el) el.innerText = langData[lang][key];
+        });
+        document.getElementById("amount").placeholder =
+          langData[lang]["place-amt"];
+        document.getElementById("category").placeholder =
+          langData[lang]["place-cat"];
+        document.getElementById("notes").placeholder =
+          langData[lang]["place-note"];
+        document.getElementById("opt-inc").innerText =
+          langData[lang]["opt-inc"];
+        document.getElementById("opt-exp").innerText =
+          langData[lang]["opt-exp"];
+        document
+          .querySelectorAll(".lang-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById(`btn-${lang}`).classList.add("active");
+        loadData();
+      }
+
+      function renderChart(income, expense) {
+        const ctx = document.getElementById("expenseChart").getContext("2d");
+        const isDark =
+          document.documentElement.getAttribute("data-theme") === "dark";
+        if (myPieChart) myPieChart.destroy();
+        myPieChart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels:
+              currentLang === "mm"
+                ? ["ဝင်ငွေ", "အသုံးစရိတ်"]
+                : ["Income", "Expense"],
+            datasets: [
+              {
+                data: [income, expense],
+                backgroundColor: ["#00c853", "#ff3d00"],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { color: isDark ? "#ffffff" : "#5f6368" },
+              },
+            },
+          },
+        });
+      }
+
+      async function loadData() {
+        const {
+          data: { user },
+        } = await _supabase.auth.getUser();
+        if (!user) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        const { data } = await _supabase.from("transactions").select("*");
+
+        if (data) {
+          let totalInc = 0,
+            totalExp = 0;
+          data.forEach((item) => {
+            if (item.type === "Income") totalInc += item.amount;
+            else totalExp += item.amount;
+          });
+          document.getElementById("val-income").innerText =
+            totalInc.toLocaleString();
+          document.getElementById("val-expense").innerText =
+            totalExp.toLocaleString();
+          document.getElementById("val-balance").innerText = (
+            totalInc - totalExp
+          ).toLocaleString();
+          renderChart(totalInc, totalExp);
+        }
+      }
+
+      async function saveTransaction() {
+        const {
+          data: { user },
+        } = await _supabase.auth.getUser();
+        const btn = document.getElementById("lbl-save");
+        const payload = {
+          date: document.getElementById("date").value,
+          type: document.getElementById("type").value,
+          amount: parseFloat(document.getElementById("amount").value),
+          category: document.getElementById("category").value,
+          notes: document.getElementById("notes").value,
+          user_id: user.id,
+        };
+        if (!payload.date || !payload.amount)
+          return alert("Fill required fields!");
+        btn.disabled = true;
+        const { error } = await _supabase
+          .from("transactions")
+          .insert([payload]);
+        if (!error) {
+          loadData();
+          document.getElementById("amount").value = "";
+          document.getElementById("category").value = "";
+          document.getElementById("notes").value = "";
+          btn.innerText = "Saved! ✓";
+          setTimeout(() => {
+            btn.innerText = langData[currentLang].save;
+            btn.disabled = false;
+          }, 2000);
+        } else {
+          btn.disabled = false;
+          alert("Error saving data.");
+        }
+      }
+
+      async function handleLogout() {
+        await _supabase.auth.signOut();
+        window.location.href = "index.html";
+      }
+
+      document
+        .getElementById("type")
+        .addEventListener("change", updateCategoryOptions);
+
+      function updateCategoryOptions() {
+        const type = document.getElementById("type").value;
+        const dataList = document.getElementById("category-list");
+        dataList.innerHTML = "";
+        const options =
+          type === "Income"
+            ? ["Salary", "Bonus", "Gifts", "Investment", "Other"]
+            : [
+                "Food",
+                "Transport",
+                "Shopping",
+                "Rent",
+                "Health",
+                "Bills",
+                "General",
+              ];
+        options.forEach((opt) => {
+          const el = document.createElement("option");
+          el.value = opt;
+          dataList.appendChild(el);
+        });
+      }
+
+      window.onload = () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        document.getElementById("theme-toggle").innerText =
+          savedTheme === "dark" ? "☀️" : "🌙";
+        const savedLang = localStorage.getItem("selectedLang") || "mm";
+        changeLang(savedLang);
+        document.getElementById("date").valueAsDate = new Date();
+        updateCategoryOptions();
+      };
+    </script>
+  </body>
+</html>

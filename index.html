@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="my" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Finance Tracker - Register</title>
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .welcome-info {
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 0 10px;
+        animation: fadeIn 0.8s ease-out;
+      }
+      .welcome-info p {
+        color: #ffffff;
+        font-size: 15px;
+        line-height: 1.6;
+        font-weight: 500;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      [data-theme="dark"] .welcome-info p {
+        color: var(--text-dark);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="auth-wrapper">
+      <div class="top-controls">
+        <div class="lang-switcher">
+          <button class="lang-btn" id="btn-mm" onclick="changeLang('mm')">
+            မြန်မာ
+          </button>
+          <button class="lang-btn" id="btn-en" onclick="changeLang('en')">
+            EN
+          </button>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon">
+          🌙
+        </button>
+      </div>
+
+      <div class="welcome-info">
+        <p id="lbl-app-info">
+          ဤ Application ကို သုံးခြင်းအားဖြင့် သင့်၏ ဝင်ငွေ နှင့် ထွက်ငွေ ကို
+          ကောင်းစွာ စီမံခန့်ခွဲ နိုင်ပါသည်။
+        </p>
+      </div>
+
+      <div class="auth-card">
+        <div id="signup-form">
+          <div class="header">
+            <h2 id="lbl-signup-title">အကောင့်သစ်ဖွင့်ရန်</h2>
+            <p class="subtitle">Join us to start tracking</p>
+          </div>
+          <div class="input-group">
+            <input type="email" id="signup-email" placeholder="Gmail လိပ်စာ" />
+            <div class="password-container">
+              <input
+                type="password"
+                id="signup-password"
+                placeholder="စကားဝှက်အသစ်"
+              />
+              <span
+                class="toggle-eye"
+                onclick="togglePass('signup-password', this)"
+                >👁️</span
+              >
+            </div>
+            <div class="password-container">
+              <input
+                type="password"
+                id="signup-confirm"
+                placeholder="စကားဝှက်အတည်ပြုပါ"
+              />
+              <span
+                class="toggle-eye"
+                onclick="togglePass('signup-confirm', this)"
+                >👁️</span
+              >
+            </div>
+          </div>
+          <button
+            class="primary-btn"
+            id="lbl-signup-btn"
+            onclick="handleSignUp()"
+          >
+            အတည်ပြုလွှာ ပို့ရန်
+          </button>
+          <div class="link-container">
+            <span class="link" id="lbl-go-login" onclick="showForm('login')"
+              >အကောင့်ရှိပြီးသားလား? ပြန်ဝင်ရန်</span
+            >
+          </div>
+        </div>
+
+        <div id="login-form" class="hidden">
+          <div class="header">
+            <h2 id="lbl-login-title">ဝင်ရန်</h2>
+            <p class="subtitle">Enter your details to continue</p>
+          </div>
+          <div class="input-group">
+            <input
+              type="email"
+              id="login-email"
+              placeholder="Gmail လိပ်စာ"
+              required
+            />
+            <div class="password-container">
+              <input
+                type="password"
+                id="login-password"
+                placeholder="စကားဝှက်"
+                required
+              />
+              <span
+                class="toggle-eye"
+                onclick="togglePass('login-password', this)"
+                >👁️</span
+              >
+            </div>
+          </div>
+          <button
+            class="primary-btn"
+            id="lbl-login-btn"
+            onclick="handleLogin()"
+          >
+            ဝင်မည်
+          </button>
+          <div class="link-container">
+            <span class="link" id="lbl-go-signup" onclick="showForm('signup')"
+              >အကောင့်အသစ်ဖွင့်ရန်</span
+            ><br />
+            <span class="link" id="lbl-go-forgot" onclick="showForm('forgot')"
+              >စကားဝှက်မေ့နေသလား?</span
+            >
+          </div>
+        </div>
+
+        <div id="forgot-form" class="hidden">
+          <div class="header">
+            <h2 id="lbl-forgot-title">စကားဝှက် ပြန်ယူရန်</h2>
+            <p class="subtitle">We'll send a link to your email</p>
+          </div>
+          <div class="input-group">
+            <input
+              type="email"
+              id="forgot-email"
+              placeholder="သင်၏ Gmail ရိုက်ထည့်ပါ"
+            />
+          </div>
+          <button
+            class="primary-btn"
+            id="lbl-forgot-btn"
+            onclick="handleForgotPassword()"
+          >
+            Link ပို့ရန်
+          </button>
+          <div class="link-container">
+            <span class="link" onclick="showForm('login')">ပြန်သွားရန်</span>
+          </div>
+        </div>
+        <div id="status" class="status-msg hidden"></div>
+      </div>
+    </div>
+
+    <script>
+      const supabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
+      const supabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
+      const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+      function togglePass(id, el) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+          input.type = "text";
+          el.innerText = "🙈";
+        } else {
+          input.type = "password";
+          el.innerText = "👁️";
+        }
+      }
+
+      const translations = {
+        mm: {
+          labels: {
+            "app-info":
+              "ဤ Application ကို သုံးခြင်းအားဖြင့် သင့်၏ ဝင်ငွေ နှင့် ထွက်ငွေ ကို ကောင်းစွာ စီမံခန့်ခွဲ နိုင်ပါသည်။",
+            "login-title": "ဝင်ရန်",
+            "signup-title": "အကောင့်သစ်ဖွင့်ရန်",
+            "forgot-title": "စကားဝှက် ပြန်ယူရန်",
+            "login-btn": "ဝင်မည်",
+            "signup-btn": "အတည်ပြုလွှာ ပို့ရန်",
+            "forgot-btn": "Link ပို့ရန်",
+            "go-signup": "အကောင့်အသစ်ဖွင့်ရန်",
+            "go-forgot": "စကားဝှက်မေ့နေသလား?",
+            "go-login": "အကောင့်ရှိပြီးသားလား? ပြန်ဝင်ရန်",
+          },
+          placeholders: {
+            "login-email": "Gmail လိပ်စာ",
+            "login-password": "စကားဝှက်",
+            "signup-email": "Gmail လိပ်စာ",
+            "signup-password": "စကားဝှက်အသစ်",
+            "signup-confirm": "စကားဝှက်အတည်ပြုပါ",
+            "forgot-email": "သင်၏ Gmail ရိုက်ထည့်ပါ",
+          },
+        },
+        en: {
+          labels: {
+            "app-info":
+              "By using this application, you can effectively manage your income and expenses.",
+            "login-title": "Welcome Back",
+            "signup-title": "Create Account",
+            "forgot-title": "Reset Password",
+            "login-btn": "Sign In",
+            "signup-btn": "Register Now",
+            "forgot-btn": "Send Reset Link",
+            "go-signup": "Don't have an account? Sign up",
+            "go-forgot": "Forgot password?",
+            "go-login": "Already have an account? Login",
+          },
+          placeholders: {
+            "login-email": "Email Address",
+            "login-password": "Password",
+            "signup-email": "Email Address",
+            "signup-password": "New Password",
+            "signup-confirm": "Confirm Password",
+            "forgot-email": "Enter your Email",
+          },
+        },
+      };
+
+      function toggleTheme() {
+        const html = document.documentElement;
+        const icon = document.getElementById("theme-icon");
+        const newTheme =
+          html.getAttribute("data-theme") === "light" ? "dark" : "light";
+        html.setAttribute("data-theme", newTheme);
+        icon.innerText = newTheme === "dark" ? "☀️" : "🌙";
+        localStorage.setItem("theme", newTheme);
+      }
+
+      function changeLang(lang) {
+        localStorage.setItem("selectedLang", lang);
+        const data = translations[lang];
+        Object.keys(data.labels).forEach((id) => {
+          const el = document.getElementById(`lbl-${id}`);
+          if (el) el.innerText = data.labels[id];
+        });
+        Object.keys(data.placeholders).forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.placeholder = data.placeholders[id];
+        });
+        document
+          .querySelectorAll(".lang-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById(`btn-${lang}`).classList.add("active");
+      }
+
+      function showForm(formId) {
+        document.getElementById("status").classList.add("hidden");
+        ["login-form", "signup-form", "forgot-form"].forEach((id) => {
+          document.getElementById(id).classList.add("hidden");
+        });
+        document.getElementById(formId + "-form").classList.remove("hidden");
+      }
+
+      function setStatus(msg, isError = true) {
+        const el = document.getElementById("status");
+        el.innerText = msg;
+        el.classList.remove("hidden", "error", "success");
+        el.classList.add(isError ? "error" : "success");
+      }
+
+      async function handleLogin() {
+        const email = document.getElementById("login-email").value;
+        const password = document.getElementById("login-password").value;
+        if (!email || !password) return setStatus("Please fill all fields");
+        const btn = document.getElementById("lbl-login-btn");
+        btn.innerText = "...";
+        btn.disabled = true;
+        const { error: loginError } = await _supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (loginError) {
+          setStatus(loginError.message);
+          btn.innerText =
+            translations[localStorage.getItem("selectedLang") || "mm"].labels[
+              "login-btn"
+            ];
+          btn.disabled = false;
+        } else {
+          window.location.href = "dashboard.html";
+        }
+      }
+
+      async function handleSignUp() {
+        const email = document.getElementById("signup-email").value;
+        const password = document.getElementById("signup-password").value;
+        const confirm = document.getElementById("signup-confirm").value;
+        if (password !== confirm) return setStatus("Passwords do not match!");
+        const { error: signUpError } = await _supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (signUpError) setStatus(signUpError.message);
+        else setStatus("Verification email sent! Check your inbox.", false);
+      }
+
+      async function handleForgotPassword() {
+        const email = document.getElementById("forgot-email").value;
+        if (!email) return setStatus("Email is required");
+        const { error: resetError } =
+          await _supabase.auth.resetPasswordForEmail(email);
+        if (resetError) setStatus(resetError.message);
+        else setStatus("Reset link sent to your email.", false);
+      }
+
+      window.onload = () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        document.getElementById("theme-icon").innerText =
+          savedTheme === "dark" ? "☀️" : "🌙";
+        const savedLang = localStorage.getItem("selectedLang") || "mm";
+        changeLang(savedLang);
+      };
+    </script>
+  </body>
+</html>
