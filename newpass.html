@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="my" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Reset Password</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="auth-wrapper">
+      <div class="top-controls">
+        <div class="lang-switcher">
+          <button
+            class="lang-btn active"
+            id="btn-lang-toggle"
+            onclick="toggleLang()"
+          >
+            EN
+          </button>
+        </div>
+        <div class="nav-actions">
+          <button
+            class="theme-toggle nav-login-btn"
+            onclick="window.location.href = 'index.html'"
+            id="lbl-nav-back"
+          >
+            နောက်သို့
+          </button>
+          <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon">
+            🌙
+          </button>
+        </div>
+      </div>
+
+      <div class="auth-card">
+        <div id="request-form">
+          <div class="header">
+            <h2 id="lbl-forgot-title">စကားဝှက် ပြန်ယူရန်</h2>
+            <p class="subtitle" id="lbl-forgot-sub">
+              မှတ်ပုံတင်ထားသော Gmail ကို ရိုက်ထည့်ပါ
+            </p>
+          </div>
+          <div class="input-group">
+            <input
+              type="email"
+              id="reset-email"
+              placeholder="Gmail လိပ်စာ"
+              required
+            />
+          </div>
+          <button
+            class="primary-btn"
+            id="lbl-forgot-btn"
+            onclick="handleSendLink()"
+          >
+            Link ပို့ရန်
+          </button>
+        </div>
+
+        <div id="update-form" class="hidden">
+          <div class="header">
+            <h2 id="lbl-reset-title">စကားဝှက်အသစ်သတ်မှတ်ရန်</h2>
+            <p class="subtitle" id="lbl-reset-sub">
+              အချက်အလက်များကို ပြည့်စုံစွာဖြည့်ပါ
+            </p>
+          </div>
+          <div class="input-group">
+            <input
+              type="email"
+              id="confirm-email"
+              placeholder="Gmail လိပ်စာ"
+              required
+            />
+
+            <div class="password-container">
+              <input
+                type="password"
+                id="new-password"
+                placeholder="စကားဝှက်အသစ်"
+                required
+              />
+              <span
+                class="toggle-eye"
+                onclick="togglePass('new-password', this)"
+                >👁️</span
+              >
+            </div>
+
+            <div class="password-container">
+              <input
+                type="password"
+                id="confirm-password"
+                placeholder="စကားဝှက်အတည်ပြုပါ"
+                required
+              />
+              <span
+                class="toggle-eye"
+                onclick="togglePass('confirm-password', this)"
+                >👁️</span
+              >
+            </div>
+          </div>
+          <button
+            class="primary-btn"
+            id="lbl-reset-save-btn"
+            onclick="handleUpdatePassword()"
+          >
+            ဝင်မည် (Login)
+          </button>
+        </div>
+
+        <div id="status" class="status-msg hidden"></div>
+
+        <div class="link-container">
+          <span
+            class="link"
+            id="lbl-go-back-link"
+            onclick="window.location.href = 'index.html'"
+            >အကောင့်ဝင်ရန် စာမျက်နှာသို့ ပြန်သွားရန်</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const supabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
+      const supabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
+      const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+      const translations = {
+        mm: {
+          labels: {
+            "nav-back": "နောက်သို့",
+            "forgot-title": "စကားဝှက် ပြန်ယူရန်",
+            "forgot-sub": "မှတ်ပုံတင်ထားသော Gmail ကို ရိုက်ထည့်ပါ",
+            "forgot-btn": "Link ပို့ရန်",
+            "reset-title": "စကားဝှက်အသစ်သတ်မှတ်ရန်",
+            "reset-sub": "အချက်အလက်များကို ပြည့်စုံစွာဖြည့်ပါ",
+            "reset-save-btn": "ဝင်မည် (Login)",
+            "go-back-link": "အကောင့်ဝင်ရန် စာမျက်နှာသို့ ပြန်သွားရန်",
+          },
+          placeholders: {
+            "reset-email": "Gmail လိပ်စာ",
+            "confirm-email": "Gmail လိပ်စာ",
+            "new-password": "စကားဝှက်အသစ်",
+            "confirm-password": "စကားဝှက်အတည်ပြုပါ",
+          },
+        },
+        en: {
+          labels: {
+            "nav-back": "Back",
+            "forgot-title": "Forgot Password",
+            "forgot-sub": "Enter your registered Gmail",
+            "forgot-btn": "Send Link",
+            "reset-title": "Reset New Password",
+            "reset-sub": "Fill in the details to update",
+            "reset-save-btn": "Login Now",
+            "go-back-link": "Back to Login Page",
+          },
+          placeholders: {
+            "reset-email": "Gmail Address",
+            "confirm-email": "Gmail Address",
+            "new-password": "New Password",
+            "confirm-password": "Confirm Password",
+          },
+        },
+      };
+
+      async function handleSendLink() {
+        const email = document.getElementById("reset-email").value;
+        if (!email) return setStatus("Email လိုအပ်ပါသည်");
+
+        const btn = document.getElementById("lbl-forgot-btn");
+        btn.disabled = true;
+        btn.innerText = "Sending...";
+
+        const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.href,
+        });
+
+        if (error) {
+          setStatus(error.message);
+          btn.disabled = false;
+          btn.innerText = "Link ပို့ရန်";
+        } else {
+          setStatus("Gmail ထဲသို့ Link ပို့လိုက်ပါပြီ။ စစ်ဆေးကြည့်ပါ။", false);
+        }
+      }
+
+      async function handleUpdatePassword() {
+        const email = document.getElementById("confirm-email").value;
+        const newPass = document.getElementById("new-password").value;
+        const confirmPass = document.getElementById("confirm-password").value;
+
+        if (!email || !newPass || !confirmPass)
+          return setStatus("အားလုံးဖြည့်စွက်ပါ");
+        if (newPass !== confirmPass)
+          return setStatus("စကားဝှက်များ တူညီမှုမရှိပါ");
+        if (newPass.length < 6)
+          return setStatus("စကားဝှက်သည် အနည်းဆုံး ၆ လုံးရှိရမည်");
+
+        const btn = document.getElementById("lbl-reset-save-btn");
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        const { error } = await _supabase.auth.updateUser({
+          password: newPass,
+        });
+
+        if (error) {
+          setStatus(error.message);
+          btn.disabled = false;
+          btn.innerText = "ဝင်မည် (Login)";
+        } else {
+          setStatus("စကားဝှက် အောင်မြင်စွာ ပြောင်းလဲပြီးပါပြီ။", false);
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1500);
+        }
+      }
+
+      function togglePass(id, el) {
+        const input = document.getElementById(id);
+        input.type = input.type === "password" ? "text" : "password";
+        el.innerText = input.type === "password" ? "👁️" : "🙈";
+      }
+
+      function toggleTheme() {
+        const html = document.documentElement;
+        const newTheme =
+          html.getAttribute("data-theme") === "light" ? "dark" : "light";
+        html.setAttribute("data-theme", newTheme);
+        document.getElementById("theme-icon").innerText =
+          newTheme === "dark" ? "☀️" : "🌙";
+        localStorage.setItem("theme", newTheme);
+      }
+
+      function toggleLang() {
+        const currentLang = localStorage.getItem("selectedLang") || "mm";
+        changeLang(currentLang === "mm" ? "en" : "mm");
+      }
+
+      function changeLang(lang) {
+        localStorage.setItem("selectedLang", lang);
+        const data = translations[lang];
+        Object.keys(data.labels).forEach((key) => {
+          const el = document.getElementById(`lbl-${key}`);
+          if (el) el.innerText = data.labels[key];
+        });
+        Object.keys(data.placeholders).forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.placeholder = data.placeholders[id];
+        });
+        document.getElementById("btn-lang-toggle").innerText =
+          lang === "mm" ? "မြန်မာ" : "EN";
+      }
+
+      function setStatus(msg, isError = true) {
+        const el = document.getElementById("status");
+        el.innerText = msg;
+        el.className = `status-msg ${isError ? "error" : "success"}`;
+        el.classList.remove("hidden");
+      }
+
+      window.onload = () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        document.getElementById("theme-icon").innerText =
+          savedTheme === "dark" ? "☀️" : "🌙";
+        changeLang(localStorage.getItem("selectedLang") || "mm");
+
+        if (
+          window.location.hash &&
+          window.location.hash.includes("type=recovery")
+        ) {
+          document.getElementById("request-form").classList.add("hidden");
+          document.getElementById("update-form").classList.remove("hidden");
+        }
+      };
+    </script>
+  </body>
+</html>

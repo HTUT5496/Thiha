@@ -133,62 +133,13 @@
             <span class="link" id="lbl-go-signup" onclick="showForm('signup')"
               >အကောင့်အသစ်ဖွင့်ရန်</span
             ><br />
-            <span class="link" id="lbl-go-forgot" onclick="showForm('forgot')"
+            <span
+              class="link"
+              id="lbl-go-forgot"
+              onclick="window.location.href = 'newpass.html'"
               >စကားဝှက်မေ့နေသလား?</span
             >
           </div>
-        </div>
-
-        <div id="forgot-form" class="hidden">
-          <div class="header">
-            <h2 id="lbl-forgot-title">စကားဝှက် ပြန်ယူရန်</h2>
-            <p class="subtitle">We'll send a link to your email</p>
-          </div>
-          <div class="input-group">
-            <input
-              type="email"
-              id="forgot-email"
-              placeholder="သင်၏ Gmail ရိုက်ထည့်ပါ"
-            />
-          </div>
-          <button
-            class="primary-btn"
-            id="lbl-forgot-btn"
-            onclick="handleForgotPassword()"
-          >
-            Link ပို့ရန်
-          </button>
-          <div class="link-container">
-            <span class="link" onclick="showForm('login')">ပြန်သွားရန်</span>
-          </div>
-        </div>
-
-        <div id="reset-password-form" class="hidden">
-          <div class="header">
-            <h2 id="lbl-reset-title">စကားဝှက်အသစ်သတ်မှတ်ရန်</h2>
-            <p class="subtitle">Type your new password below</p>
-          </div>
-          <div class="input-group">
-            <div class="password-container">
-              <input
-                type="password"
-                id="new-password"
-                placeholder="စကားဝှက်အသစ်"
-              />
-              <span
-                class="toggle-eye"
-                onclick="togglePass('new-password', this)"
-                >👁️</span
-              >
-            </div>
-          </div>
-          <button
-            class="primary-btn"
-            id="lbl-reset-save-btn"
-            onclick="handleUpdatePassword()"
-          >
-            စကားဝှက်အသစ်သိမ်းမည်
-          </button>
         </div>
 
         <div id="status" class="status-msg hidden"></div>
@@ -200,33 +151,19 @@
       const supabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
       const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-      // --- Updated Auth Check to prevent skipping Reset Password ---
       async function checkAuth() {
-        // Detect if the URL contains the recovery token
         const isRecovery =
           window.location.hash &&
           window.location.hash.includes("type=recovery");
-
         const {
           data: { session },
         } = await _supabase.auth.getSession();
-
-        // Only redirect to dashboard if we have a session AND it's NOT a password recovery flow
         if (session && !isRecovery) {
           window.location.href = "dashboard.html";
         }
       }
-
-      // Check auth state immediately
       checkAuth();
 
-      _supabase.auth.onAuthStateChanged((event, session) => {
-        if (event === "PASSWORD_RECOVERY") {
-          showForm("reset-password");
-        }
-      });
-
-      // ... (togglePass, toggleTheme, toggleLang, changeLang, showForm, setStatus, resetButton functions remain the same) ...
       function togglePass(id, el) {
         const input = document.getElementById(id);
         if (input.type === "password") {
@@ -245,16 +182,12 @@
               "ဤ Application ကို သုံးခြင်းအားဖြင့် သင့်၏ ဝင်ငွေ နှင့် ထွက်ငွေ ကို ကောင်းစွာ စီမံခန့်ခွဲ နိုင်ပါသည်။",
             "login-title": "ဝင်ရန်",
             "signup-title": "အကောင့်သစ်ဖွင့်ရန်",
-            "forgot-title": "စကားဝှက် ပြန်ယူရန်",
-            "reset-title": "စကားဝှက်အသစ်သတ်မှတ်ရန်",
+            "nav-login": "ဝင်ရန်",
             "login-btn": "ဝင်မည်",
             "signup-btn": "အတည်ပြုလွှာ ပို့ရန်",
-            "forgot-btn": "Link ပို့ရန်",
-            "reset-save-btn": "စကားဝှက်အသစ်သိမ်းမည်",
             "go-signup": "အကောင့်အသစ်ဖွင့်ရန်",
             "go-forgot": "စကားဝှက်မေ့နေသလား?",
             "go-login": "အကောင့်ရှိပြီးသားလား? ပြန်ဝင်ရန်",
-            "nav-login": "ဝင်ရန်",
           },
           placeholders: {
             "login-email": "Gmail လိပ်စာ",
@@ -262,8 +195,6 @@
             "signup-email": "Gmail လိပ်စာ",
             "signup-password": "စကားဝှက်အသစ်",
             "signup-confirm": "စကားဝှက်အတည်ပြုပါ",
-            "forgot-email": "သင်၏ Gmail ရိုက်ထည့်ပါ",
-            "new-password": "စကားဝှက်အသစ်",
           },
         },
         en: {
@@ -272,16 +203,12 @@
               "By using this application, you can effectively manage your income and expenses.",
             "login-title": "Welcome Back",
             "signup-title": "Create Account",
-            "forgot-title": "Reset Password",
-            "reset-title": "New Password",
+            "nav-login": "Login",
             "login-btn": "Sign In",
             "signup-btn": "Register Now",
-            "forgot-btn": "Send Reset Link",
-            "reset-save-btn": "Save New Password",
             "go-signup": "Don't have an account? Sign up",
             "go-forgot": "Forgot password?",
             "go-login": "Already have an account? Login",
-            "nav-login": "Login",
           },
           placeholders: {
             "login-email": "Email Address",
@@ -289,8 +216,6 @@
             "signup-email": "Email Address",
             "signup-password": "New Password",
             "signup-confirm": "Confirm Password",
-            "forgot-email": "Enter your Email",
-            "new-password": "New Password",
           },
         },
       };
@@ -314,26 +239,25 @@
       function changeLang(lang) {
         localStorage.setItem("selectedLang", lang);
         const data = translations[lang];
-        Object.keys(data.labels).forEach((id) => {
-          const el = document.getElementById(`lbl-${id}`);
-          if (el) el.innerText = data.labels[id];
+
+        // Corrected mapping: Ensure the ID matches the HTML exactly
+        Object.keys(data.labels).forEach((key) => {
+          const el = document.getElementById(`lbl-${key}`);
+          if (el) el.innerText = data.labels[key];
         });
+
         Object.keys(data.placeholders).forEach((id) => {
           const el = document.getElementById(id);
           if (el) el.placeholder = data.placeholders[id];
         });
+
         const langToggleBtn = document.getElementById("btn-lang-toggle");
         langToggleBtn.innerText = lang === "mm" ? "မြန်မာ" : "EN";
       }
 
       function showForm(formId) {
         document.getElementById("status").classList.add("hidden");
-        [
-          "login-form",
-          "signup-form",
-          "forgot-form",
-          "reset-password-form",
-        ].forEach((id) => {
+        ["login-form", "signup-form"].forEach((id) => {
           const el = document.getElementById(id);
           if (el) el.classList.add("hidden");
         });
@@ -348,18 +272,11 @@
         el.classList.add(isError ? "error" : "success");
       }
 
-      function resetButton(btn, originalText) {
-        btn.innerText = originalText;
-        btn.disabled = false;
-      }
-
       async function handleLogin() {
         const email = document.getElementById("login-email").value;
         const password = document.getElementById("login-password").value;
         if (!email || !password) return setStatus("Please fill all fields");
         const btn = document.getElementById("lbl-login-btn");
-        const originalText = btn.innerText;
-        btn.innerHTML = `Loading... <div class="spinner"></div>`;
         btn.disabled = true;
         const { error } = await _supabase.auth.signInWithPassword({
           email,
@@ -367,7 +284,7 @@
         });
         if (error) {
           setStatus(error.message);
-          resetButton(btn, originalText);
+          btn.disabled = false;
         } else {
           window.location.href = "dashboard.html";
         }
@@ -377,63 +294,18 @@
         const email = document.getElementById("signup-email").value;
         const password = document.getElementById("signup-password").value;
         const confirm = document.getElementById("signup-confirm").value;
-        const btn = document.getElementById("lbl-signup-btn");
-        const originalText = btn.innerText;
-        if (!email || !password || !confirm)
-          return setStatus("Please fill all fields");
         if (password !== confirm) return setStatus("Passwords do not match!");
-        btn.innerHTML = `Sending... <div class="spinner"></div>`;
+        const btn = document.getElementById("lbl-signup-btn");
         btn.disabled = true;
         const { error } = await _supabase.auth.signUp({ email, password });
         if (error) {
           setStatus(error.message);
+          btn.disabled = false;
         } else {
-          setStatus("Check your Gmail to confirm your account!", false);
-          setTimeout(() => showForm("login"), 4000);
-        }
-        resetButton(btn, originalText);
-      }
-
-      async function handleForgotPassword() {
-        const email = document.getElementById("forgot-email").value;
-        if (!email) return setStatus("Email is required");
-        const btn = document.getElementById("lbl-forgot-btn");
-        const originalText = btn.innerText;
-        btn.innerHTML = `Sending... <div class="spinner"></div>`;
-        btn.disabled = true;
-        const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + window.location.pathname,
-        });
-        if (error) {
-          setStatus(error.message);
-        } else {
-          setStatus("Reset link sent! Please check your Gmail.", false);
-        }
-        resetButton(btn, originalText);
-      }
-
-      async function handleUpdatePassword() {
-        const newPassword = document.getElementById("new-password").value;
-        if (!newPassword) return setStatus("Please enter a new password");
-        const btn = document.getElementById("lbl-reset-save-btn");
-        const originalText = btn.innerText;
-        btn.innerHTML = `Saving... <div class="spinner"></div>`;
-        btn.disabled = true;
-        const { error } = await _supabase.auth.updateUser({
-          password: newPassword,
-        });
-        if (error) {
-          setStatus(error.message);
-          resetButton(btn, originalText);
-        } else {
-          setStatus("Password updated! Redirecting...", false);
-          setTimeout(() => {
-            window.location.href = "dashboard.html";
-          }, 2000);
+          setStatus("Check your Gmail to confirm!", false);
         }
       }
 
-      // --- Updated window.onload to handle recovery hash immediately ---
       window.onload = () => {
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
@@ -443,23 +315,9 @@
         const savedLang = localStorage.getItem("selectedLang") || "mm";
         changeLang(savedLang);
 
-        const isRecovery =
-          window.location.hash &&
-          window.location.hash.includes("type=recovery");
-
-        if (isRecovery) {
-          // Force the reset form if recovery hash is present
-          showForm("reset-password");
-        } else {
-          // Standard login check
-          _supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-              window.location.href = "dashboard.html";
-            } else {
-              showForm("signup");
-            }
-          });
-        }
+        _supabase.auth.getSession().then(({ data: { session } }) => {
+          if (!session) showForm("signup");
+        });
       };
     </script>
   </body>
