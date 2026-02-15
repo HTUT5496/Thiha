@@ -270,10 +270,11 @@
         document.getElementById("modalTitle").innerText =
           langData[currentLang][id];
 
-        // Dynamically style the save button based on type
         const saveBtn = document.getElementById("btnSave");
         saveBtn.style.background =
           selectedType === "Income" ? "#10b981" : "#ef4444";
+
+        // Hand-over effect for shadows
         saveBtn.style.boxShadow =
           selectedType === "Income"
             ? "0 10px 20px rgba(16, 185, 129, 0.3)"

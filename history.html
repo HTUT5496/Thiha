@@ -9,27 +9,12 @@
     <title>Finance Tracker - Full History</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <script>
-      const tempSupabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
-      const tempSupabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
-      const _tempSupabase = supabase.createClient(
-        tempSupabaseUrl,
-        tempSupabaseKey,
-      );
-
-      _tempSupabase.auth.getSession().then(({ data: { session } }) => {
-        if (!session) {
-          window.location.href = "index.html";
-        }
-      });
-    </script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="history.css" />
@@ -41,24 +26,17 @@
           class="btn-dashboard"
           onclick="window.location.href = 'dashboard.html'"
         >
-          <i class="fa-solid fa-house"></i>
+          <i class="fa-solid fa-arrow-left"></i>
           <span id="lbl-back">Home</span>
         </button>
 
         <div class="header-right">
-          <button class="theme-toggle" id="theme-icon" onclick="toggleTheme()">
-            🌙
+          <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">
+            <span id="theme-icon">🌙</span>
           </button>
-
-          <div class="lang-switcher">
-            <button
-              class="lang-btn"
-              id="btn-lang-toggle"
-              onclick="toggleLang()"
-            >
-              ENGLISH
-            </button>
-          </div>
+          <button class="lang-btn" id="btn-lang-toggle" onclick="toggleLang()">
+            ENGLISH
+          </button>
         </div>
       </div>
 
@@ -95,10 +73,12 @@
             id="clear-search"
             class="btn-clear-search"
             onclick="clearSearch()"
+            style="display: none"
           >
             <i class="fa-solid fa-circle-xmark"></i>
           </button>
         </div>
+
         <div class="date-filter-group">
           <input type="date" id="date-from" onchange="loadFullHistory()" />
           <input type="date" id="date-to" onchange="loadFullHistory()" />
@@ -110,24 +90,26 @@
 
       <div class="history-header-row">
         <span class="history-title" id="lbl-trans-title">Transactions</span>
-        <div style="display: flex; gap: 8px">
+        <div class="action-buttons">
           <button
-            class="btn-download-modern"
-            style="background: var(--primary)"
+            class="btn-action-primary"
             onclick="window.location.href = 'addnew.html'"
           >
             <i class="fa-solid fa-plus"></i>
             <span id="lbl-add-new">Add New</span>
           </button>
-
-          <button class="btn-download-modern" onclick="exportCSV()">
+          <button class="btn-action-secondary" onclick="exportCSV()">
             <i class="fa-solid fa-file-excel"></i>
             <span id="lbl-export">Export</span>
           </button>
         </div>
       </div>
 
-      <div id="full-history-list"></div>
+      <div id="full-history-list">
+        <div class="loading-spinner">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -166,7 +148,7 @@
           export: "Excel ထုတ်ရန်",
           addNew: "အသစ်ထည့်ရန်",
           editNotePrompt: "မှတ်စုကို ပြင်ဆင်ရန်:",
-          searchPlaceholder: "မှတ်စု ဖြင့် ရှာပါ",
+          searchPlaceholder: "ရှာဖွေရန်...",
           Salary: "လစာ",
           Bonus: "ဆုကြေး",
           Gifts: "လက်ဆောင်",
@@ -191,7 +173,7 @@
           export: "Export CSV",
           addNew: "Add New",
           editNotePrompt: "Edit Note:",
-          searchPlaceholder: "Search by notes...",
+          searchPlaceholder: "Search notes...",
           Salary: "Salary",
           Bonus: "Bonus",
           Gifts: "Gifts",
@@ -220,15 +202,18 @@
         filterData();
       }
 
-      /* --- Updated toggleTheme to match index.html --- */
       function toggleTheme() {
         const html = document.documentElement;
-        const icon = document.getElementById("theme-icon");
         const newTheme =
           html.getAttribute("data-theme") === "light" ? "dark" : "light";
-        html.setAttribute("data-theme", newTheme);
-        icon.innerText = newTheme === "dark" ? "☀️" : "🌙";
-        localStorage.setItem("theme", newTheme);
+        applyTheme(newTheme);
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        document.getElementById("theme-icon").innerText =
+          theme === "dark" ? "☀️" : "🌙";
+        localStorage.setItem("theme", theme);
       }
 
       function toggleLang() {
@@ -239,7 +224,6 @@
       function changeLang(lang) {
         currentLang = lang;
         localStorage.setItem("selectedLang", lang);
-
         document.getElementById("lbl-back").innerText = langData[lang].back;
         document.getElementById("lbl-inc").innerText = langData[lang].inc;
         document.getElementById("lbl-exp").innerText = langData[lang].exp;
@@ -252,10 +236,8 @@
           langData[lang].addNew;
         document.getElementById("search-bar").placeholder =
           langData[lang].searchPlaceholder;
-
         document.getElementById("btn-lang-toggle").innerText =
           lang === "mm" ? "ENGLISH" : "မြန်မာ";
-
         renderList(allData);
       }
 
@@ -282,18 +264,20 @@
           .from("transactions")
           .select("*")
           .eq("user_id", user.id)
-          .order("id", { ascending: false });
+          .order("date", { ascending: false });
 
         const df = document.getElementById("date-from").value;
         const dt = document.getElementById("date-to").value;
 
         if (df) query = query.gte("date", df);
         if (dt) query = query.lte("date", dt);
+
+        // This handles the filtering logic
         if (activeTypeFilter === "income") query = query.eq("type", "Income");
         if (activeTypeFilter === "expense") query = query.eq("type", "Expense");
 
-        const { data } = await query;
-        if (data) {
+        const { data, error } = await query;
+        if (!error && data) {
           allData = data;
           renderList(data);
           updateFilterUI();
@@ -301,37 +285,17 @@
       }
 
       function updateFilterUI() {
-        const cardInc = document.getElementById("card-inc");
-        const cardExp = document.getElementById("card-exp");
-
-        cardInc.classList.toggle(
-          "filter-active",
-          activeTypeFilter === "income",
-        );
-        cardExp.classList.toggle(
-          "filter-active",
-          activeTypeFilter === "expense",
-        );
-      }
-
-      async function editNote(id, currentNote) {
-        const newNote = prompt(
-          langData[currentLang].editNotePrompt,
-          currentNote || "",
-        );
-        if (newNote !== null) {
-          const { error } = await _supabase
-            .from("transactions")
-            .update({ notes: newNote })
-            .eq("id", id);
-          if (!error) loadFullHistory();
-        }
+        document
+          .getElementById("card-inc")
+          .classList.toggle("filter-active", activeTypeFilter === "income");
+        document
+          .getElementById("card-exp")
+          .classList.toggle("filter-active", activeTypeFilter === "expense");
       }
 
       function renderList(data) {
         const listDiv = document.getElementById("full-history-list");
         listDiv.innerHTML = "";
-
         let tInc = 0,
           tExp = 0,
           lastMonth = "";
@@ -359,9 +323,8 @@
               </div>
               <div class="item-middle">
                 <span class="item-category">${langData[currentLang][item.category] || item.category}</span>
-                <div class="note-bubble" onclick="editNote(${item.id}, '${item.notes || ""}')" title="Click to edit">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                  ${item.notes || "..."}
+                <div class="note-bubble" onclick="editNote(${item.id}, '${item.notes || ""}')">
+                  <i class="fa-solid fa-pen"></i> <span>${item.notes || "..."}</span>
                 </div>
                 <span class="item-date">${item.date}</span>
               </div>
@@ -370,24 +333,36 @@
                   ${isInc ? "+" : "-"} ${item.amount.toLocaleString()}
                 </div>
                 <button class="btn-del" onclick="deleteItem(${item.id})">
-                  <i class="fa-solid fa-trash-can"></i>
+                  <i class="fa-solid fa-trash"></i>
                 </button>
               </div>
             </div>`;
         });
 
-        const netBal = tInc - tExp;
         document.getElementById("stat-inc").innerText = tInc.toLocaleString();
         document.getElementById("stat-exp").innerText = tExp.toLocaleString();
-
+        const netBal = tInc - tExp;
         const balEl = document.getElementById("stat-bal");
         balEl.innerText = netBal.toLocaleString();
-
         balEl.className =
           "amount " + (netBal < 0 ? "negative-balance" : "positive-balance");
 
         if (data.length === 0) {
-          listDiv.innerHTML = `<div class="empty-state">${langData[currentLang].empty}</div>`;
+          listDiv.innerHTML = `<div class="empty-state"><p>${langData[currentLang].empty}</p></div>`;
+        }
+      }
+
+      async function editNote(id, currentNote) {
+        const newNote = prompt(
+          langData[currentLang].editNotePrompt,
+          currentNote || "",
+        );
+        if (newNote !== null) {
+          const { error } = await _supabase
+            .from("transactions")
+            .update({ notes: newNote })
+            .eq("id", id);
+          if (!error) loadFullHistory();
         }
       }
 
@@ -424,7 +399,7 @@
         const blob = new Blob([csv], { type: "text/csv" });
         const a = document.createElement("a");
         a.href = window.URL.createObjectURL(blob);
-        a.download = `History_Export.csv`;
+        a.download = `History_${new Date().toISOString().split("T")[0]}.csv`;
         a.click();
       }
 
@@ -432,18 +407,19 @@
         const {
           data: { session },
         } = await _supabase.auth.getSession();
-        if (!session) {
-          window.location.href = "index.html";
-          return;
+        if (!session) return (window.location.href = "index.html");
+
+        applyTheme(localStorage.getItem("theme") || "light");
+        changeLang(localStorage.getItem("selectedLang") || "mm");
+
+        // --- NEW: Check for URL parameters from Dashboard ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterParam = urlParams.get("filter"); // 'income' or 'expense'
+
+        if (filterParam) {
+          activeTypeFilter = filterParam;
         }
 
-        /* --- Updated persistence logic to match index.html --- */
-        const savedTheme = localStorage.getItem("theme") || "light";
-        document.documentElement.setAttribute("data-theme", savedTheme);
-        document.getElementById("theme-icon").innerText =
-          savedTheme === "dark" ? "☀️" : "🌙";
-
-        changeLang(localStorage.getItem("selectedLang") || "mm");
         loadFullHistory();
       };
     </script>

@@ -28,17 +28,11 @@
             EN
           </button>
         </div>
-        <div class="nav-actions" style="display: flex; gap: 10px">
+        <div class="nav-actions">
           <button
-            class="theme-toggle"
+            class="theme-toggle nav-login-btn"
             onclick="showForm('login')"
             id="lbl-nav-login"
-            style="
-              font-size: 12px;
-              font-weight: 700;
-              width: auto;
-              padding: 0 15px;
-            "
           >
             ဝင်ရန်
           </button>
@@ -168,6 +162,35 @@
             <span class="link" onclick="showForm('login')">ပြန်သွားရန်</span>
           </div>
         </div>
+
+        <div id="reset-password-form" class="hidden">
+          <div class="header">
+            <h2 id="lbl-reset-title">စကားဝှက်အသစ်သတ်မှတ်ရန်</h2>
+            <p class="subtitle">Type your new password below</p>
+          </div>
+          <div class="input-group">
+            <div class="password-container">
+              <input
+                type="password"
+                id="new-password"
+                placeholder="စကားဝှက်အသစ်"
+              />
+              <span
+                class="toggle-eye"
+                onclick="togglePass('new-password', this)"
+                >👁️</span
+              >
+            </div>
+          </div>
+          <button
+            class="primary-btn"
+            id="lbl-reset-save-btn"
+            onclick="handleUpdatePassword()"
+          >
+            စကားဝှက်အသစ်သိမ်းမည်
+          </button>
+        </div>
+
         <div id="status" class="status-msg hidden"></div>
       </div>
     </div>
@@ -186,6 +209,13 @@
         }
       }
       checkAuth();
+
+      // Listen for Password Reset events from Gmail
+      _supabase.auth.onAuthStateChanged((event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          showForm("reset-password");
+        }
+      });
 
       function togglePass(id, el) {
         const input = document.getElementById(id);
@@ -206,9 +236,11 @@
             "login-title": "ဝင်ရန်",
             "signup-title": "အကောင့်သစ်ဖွင့်ရန်",
             "forgot-title": "စကားဝှက် ပြန်ယူရန်",
+            "reset-title": "စကားဝှက်အသစ်သတ်မှတ်ရန်",
             "login-btn": "ဝင်မည်",
             "signup-btn": "အတည်ပြုလွှာ ပို့ရန်",
             "forgot-btn": "Link ပို့ရန်",
+            "reset-save-btn": "စကားဝှက်အသစ်သိမ်းမည်",
             "go-signup": "အကောင့်အသစ်ဖွင့်ရန်",
             "go-forgot": "စကားဝှက်မေ့နေသလား?",
             "go-login": "အကောင့်ရှိပြီးသားလား? ပြန်ဝင်ရန်",
@@ -221,6 +253,7 @@
             "signup-password": "စကားဝှက်အသစ်",
             "signup-confirm": "စကားဝှက်အတည်ပြုပါ",
             "forgot-email": "သင်၏ Gmail ရိုက်ထည့်ပါ",
+            "new-password": "စကားဝှက်အသစ်",
           },
         },
         en: {
@@ -230,9 +263,11 @@
             "login-title": "Welcome Back",
             "signup-title": "Create Account",
             "forgot-title": "Reset Password",
+            "reset-title": "New Password",
             "login-btn": "Sign In",
             "signup-btn": "Register Now",
             "forgot-btn": "Send Reset Link",
+            "reset-save-btn": "Save New Password",
             "go-signup": "Don't have an account? Sign up",
             "go-forgot": "Forgot password?",
             "go-login": "Already have an account? Login",
@@ -245,6 +280,7 @@
             "signup-password": "New Password",
             "signup-confirm": "Confirm Password",
             "forgot-email": "Enter your Email",
+            "new-password": "New Password",
           },
         },
       };
@@ -285,10 +321,17 @@
 
       function showForm(formId) {
         document.getElementById("status").classList.add("hidden");
-        ["login-form", "signup-form", "forgot-form"].forEach((id) => {
-          document.getElementById(id).classList.add("hidden");
+        [
+          "login-form",
+          "signup-form",
+          "forgot-form",
+          "reset-password-form",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add("hidden");
         });
-        document.getElementById(formId + "-form").classList.remove("hidden");
+        const target = document.getElementById(formId + "-form");
+        if (target) target.classList.remove("hidden");
       }
 
       function setStatus(msg, isError = true) {
@@ -298,24 +341,29 @@
         el.classList.add(isError ? "error" : "success");
       }
 
+      function resetButton(btn, originalText) {
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+
       async function handleLogin() {
         const email = document.getElementById("login-email").value;
         const password = document.getElementById("login-password").value;
         if (!email || !password) return setStatus("Please fill all fields");
+
         const btn = document.getElementById("lbl-login-btn");
         const originalText = btn.innerText;
-        btn.innerText = "...";
+        btn.innerHTML = `Loading... <div class="spinner"></div>`;
         btn.disabled = true;
 
-        const { error: loginError } = await _supabase.auth.signInWithPassword({
+        const { error } = await _supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (loginError) {
-          setStatus(loginError.message);
-          btn.innerText = originalText;
-          btn.disabled = false;
+        if (error) {
+          setStatus(error.message);
+          resetButton(btn, originalText);
         } else {
           window.location.href = "dashboard.html";
         }
@@ -332,36 +380,63 @@
           return setStatus("Please fill all fields");
         if (password !== confirm) return setStatus("Passwords do not match!");
 
-        btn.innerText = "...";
+        btn.innerHTML = `Sending... <div class="spinner"></div>`;
         btn.disabled = true;
 
-        const { error: signUpError } = await _supabase.auth.signUp({
-          email,
-          password,
-        });
+        const { error } = await _supabase.auth.signUp({ email, password });
 
-        if (signUpError) {
-          setStatus(signUpError.message);
-          btn.innerText = originalText;
-          btn.disabled = false;
+        if (error) {
+          setStatus(error.message);
         } else {
-          setStatus(
-            "Verification email sent! Check your Gmail and confirm before logging in.",
-            false,
-          );
-          btn.innerText = originalText;
-          btn.disabled = false;
-          setTimeout(() => showForm("login"), 3000);
+          setStatus("Check your Gmail to confirm your account!", false);
+          setTimeout(() => showForm("login"), 4000);
         }
+        resetButton(btn, originalText);
       }
 
       async function handleForgotPassword() {
         const email = document.getElementById("forgot-email").value;
         if (!email) return setStatus("Email is required");
-        const { error: resetError } =
-          await _supabase.auth.resetPasswordForEmail(email);
-        if (resetError) setStatus(resetError.message);
-        else setStatus("Reset link sent to your email.", false);
+
+        const btn = document.getElementById("lbl-forgot-btn");
+        const originalText = btn.innerText;
+        btn.innerHTML = `Sending... <div class="spinner"></div>`;
+        btn.disabled = true;
+
+        const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.href,
+        });
+
+        if (error) {
+          setStatus(error.message);
+        } else {
+          setStatus("Reset link sent! Please check your Gmail.", false);
+        }
+        resetButton(btn, originalText);
+      }
+
+      async function handleUpdatePassword() {
+        const newPassword = document.getElementById("new-password").value;
+        if (!newPassword) return setStatus("Please enter a new password");
+
+        const btn = document.getElementById("lbl-reset-save-btn");
+        const originalText = btn.innerText;
+        btn.innerHTML = `Saving... <div class="spinner"></div>`;
+        btn.disabled = true;
+
+        const { error } = await _supabase.auth.updateUser({
+          password: newPassword,
+        });
+
+        if (error) {
+          setStatus(error.message);
+          resetButton(btn, originalText);
+        } else {
+          setStatus("Password updated! Redirecting...", false);
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 2000);
+        }
       }
 
       window.onload = () => {
@@ -374,9 +449,7 @@
         changeLang(savedLang);
 
         _supabase.auth.getSession().then(({ data: { session } }) => {
-          if (!session) {
-            showForm("signup");
-          }
+          if (!session) showForm("signup");
         });
       };
     </script>

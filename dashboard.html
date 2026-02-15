@@ -7,18 +7,14 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <title>Finance Tracker - Premium Dashboard</title>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script>
-      // Quick check before anything renders to prevent unauthorized access
       const tempSupabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
       const tempSupabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
       const _tempSupabase = supabase.createClient(
         tempSupabaseUrl,
         tempSupabaseKey,
       );
-
       _tempSupabase.auth.getSession().then(({ data: { session } }) => {
         if (!session) {
           window.location.href = "index.html";
@@ -34,6 +30,19 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="dashboard.css" />
+    <style>
+      /* Quick Title Overrides for Font Size */
+      .summary-card small {
+        font-size: 13px !important;
+        letter-spacing: 0.5px;
+      }
+      .summary-card.bal small {
+        font-size: 14px !important;
+      }
+      .cat-section-title {
+        font-size: 13px !important;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -55,17 +64,21 @@
         <div
           class="summary-card inc"
           onclick="window.location.href = 'history.html?filter=income'"
+          style="cursor: pointer"
         >
           <small id="lbl-income">Income</small>
           <p class="amount" id="val-income">0</p>
         </div>
+
         <div
           class="summary-card exp"
           onclick="window.location.href = 'history.html?filter=expense'"
+          style="cursor: pointer"
         >
           <small id="lbl-expense">Expense</small>
           <p class="amount" id="val-expense">0</p>
         </div>
+
         <div class="summary-card bal">
           <small id="lbl-balance">Balance</small>
           <p class="amount" id="val-balance">0</p>
@@ -79,17 +92,23 @@
         </a>
       </div>
 
-      <div class="section-header">
-        <h3 class="cat-section-title" id="lbl-inc-title">Income</h3>
-        <hr />
-      </div>
-      <div class="category-grid" id="income-grid"></div>
+      <div class="dashboard-main">
+        <div class="income-section">
+          <div class="section-header">
+            <h3 class="cat-section-title" id="lbl-inc-title">Income</h3>
+            <hr />
+          </div>
+          <div class="category-grid" id="income-grid"></div>
+        </div>
 
-      <div class="section-header">
-        <h3 class="cat-section-title" id="lbl-exp-title">Expense</h3>
-        <hr />
+        <div class="expense-section">
+          <div class="section-header">
+            <h3 class="cat-section-title" id="lbl-exp-title">Expense</h3>
+            <hr />
+          </div>
+          <div class="category-grid" id="expense-grid"></div>
+        </div>
       </div>
-      <div class="category-grid" id="expense-grid"></div>
     </div>
 
     <div id="addModal" class="modal-overlay">
@@ -98,11 +117,8 @@
           <h3 id="lbl-modal-title">New Transaction</h3>
           <span id="modal-cat-display"></span>
         </div>
-
         <div class="form-body">
-          <div class="form-group">
-            <input type="date" id="m-date" />
-          </div>
+          <div class="form-group"><input type="date" id="m-date" /></div>
           <div class="form-group">
             <input
               type="number"
@@ -114,7 +130,6 @@
           <div class="form-group">
             <textarea id="m-notes" placeholder="Note" rows="3"></textarea>
           </div>
-
           <button
             class="btn-save"
             id="lbl-modal-save"
@@ -122,7 +137,6 @@
           >
             Save Record
           </button>
-
           <button
             onclick="closeModal()"
             class="btn-cancel-link"
@@ -244,15 +258,12 @@
         document.getElementById("m-date").valueAsDate = new Date();
         document.getElementById("m-amount").value = "";
         document.getElementById("m-notes").value = "";
-
         const saveBtn = document.getElementById("lbl-modal-save");
-        // Apply dynamic color based on Income or Expense
         saveBtn.style.background = type === "Income" ? "#10b981" : "#ef4444";
         saveBtn.style.boxShadow =
           type === "Income"
             ? "0 10px 20px rgba(16, 185, 129, 0.3)"
             : "0 10px 20px rgba(239, 68, 68, 0.3)";
-
         document.getElementById("addModal").classList.add("active");
         setTimeout(() => document.getElementById("m-amount").focus(), 300);
       }
@@ -267,11 +278,9 @@
         } = await _supabase.auth.getUser();
         const amt = parseFloat(document.getElementById("m-amount").value);
         if (!amt) return;
-
         const btn = document.getElementById("lbl-modal-save");
         btn.disabled = true;
         btn.innerText = currentLang === "mm" ? "သိမ်းနေသည်..." : "Saving...";
-
         const { error } = await _supabase.from("transactions").insert([
           {
             date: document.getElementById("m-date").value,
@@ -282,7 +291,6 @@
             user_id: user.id,
           },
         ]);
-
         if (!error) {
           await loadData();
           closeModal();
@@ -298,12 +306,10 @@
           data: { user },
         } = await _supabase.auth.getUser();
         if (!user) return;
-
         const { data } = await _supabase
           .from("transactions")
           .select("*")
           .eq("user_id", user.id);
-
         if (data) {
           let tInc = 0,
             tExp = 0,
@@ -320,11 +326,9 @@
           document.getElementById("val-balance").innerText = (
             tInc - tExp
           ).toLocaleString();
-
           document
             .querySelectorAll(".cat-val")
             .forEach((el) => (el.innerText = "0"));
-
           Object.keys(sums).forEach((c) => {
             const el = document.getElementById(`amt-${c}`);
             if (el) el.innerText = sums[c].toLocaleString();
@@ -333,14 +337,12 @@
       }
 
       function toggleLang() {
-        const newLang = currentLang === "mm" ? "en" : "mm";
-        changeLang(newLang);
+        changeLang(currentLang === "mm" ? "en" : "mm");
       }
 
       function changeLang(lang) {
         currentLang = lang;
         localStorage.setItem("selectedLang", lang);
-
         document.getElementById("lbl-income").innerText = langData[lang].income;
         document.getElementById("lbl-expense").innerText =
           langData[lang].expense;
@@ -362,10 +364,8 @@
         document.getElementById("m-notes").placeholder =
           langData[lang].placeNotes;
         document.getElementById("lbl-cancel").innerText = langData[lang].cancel;
-
         document.getElementById("btn-lang-toggle").innerText =
           lang === "mm" ? "ENGLISH" : "မြန်မာ";
-
         renderButtons();
         loadData();
       }
@@ -393,12 +393,10 @@
           window.location.href = "index.html";
           return;
         }
-
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
         document.getElementById("theme-icon").innerText =
           savedTheme === "dark" ? "☀️" : "🌙";
-
         changeLang(localStorage.getItem("selectedLang") || "mm");
       };
     </script>
