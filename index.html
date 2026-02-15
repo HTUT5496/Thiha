@@ -200,23 +200,33 @@
       const supabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
       const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+      // --- Updated Auth Check to prevent skipping Reset Password ---
       async function checkAuth() {
+        // Detect if the URL contains the recovery token
+        const isRecovery =
+          window.location.hash &&
+          window.location.hash.includes("type=recovery");
+
         const {
           data: { session },
         } = await _supabase.auth.getSession();
-        if (session) {
+
+        // Only redirect to dashboard if we have a session AND it's NOT a password recovery flow
+        if (session && !isRecovery) {
           window.location.href = "dashboard.html";
         }
       }
+
+      // Check auth state immediately
       checkAuth();
 
-      // Listen for Password Reset events from Gmail
       _supabase.auth.onAuthStateChanged((event, session) => {
         if (event === "PASSWORD_RECOVERY") {
           showForm("reset-password");
         }
       });
 
+      // ... (togglePass, toggleTheme, toggleLang, changeLang, showForm, setStatus, resetButton functions remain the same) ...
       function togglePass(id, el) {
         const input = document.getElementById(id);
         if (input.type === "password") {
@@ -304,17 +314,14 @@
       function changeLang(lang) {
         localStorage.setItem("selectedLang", lang);
         const data = translations[lang];
-
         Object.keys(data.labels).forEach((id) => {
           const el = document.getElementById(`lbl-${id}`);
           if (el) el.innerText = data.labels[id];
         });
-
         Object.keys(data.placeholders).forEach((id) => {
           const el = document.getElementById(id);
           if (el) el.placeholder = data.placeholders[id];
         });
-
         const langToggleBtn = document.getElementById("btn-lang-toggle");
         langToggleBtn.innerText = lang === "mm" ? "မြန်မာ" : "EN";
       }
@@ -350,17 +357,14 @@
         const email = document.getElementById("login-email").value;
         const password = document.getElementById("login-password").value;
         if (!email || !password) return setStatus("Please fill all fields");
-
         const btn = document.getElementById("lbl-login-btn");
         const originalText = btn.innerText;
         btn.innerHTML = `Loading... <div class="spinner"></div>`;
         btn.disabled = true;
-
         const { error } = await _supabase.auth.signInWithPassword({
           email,
           password,
         });
-
         if (error) {
           setStatus(error.message);
           resetButton(btn, originalText);
@@ -375,16 +379,12 @@
         const confirm = document.getElementById("signup-confirm").value;
         const btn = document.getElementById("lbl-signup-btn");
         const originalText = btn.innerText;
-
         if (!email || !password || !confirm)
           return setStatus("Please fill all fields");
         if (password !== confirm) return setStatus("Passwords do not match!");
-
         btn.innerHTML = `Sending... <div class="spinner"></div>`;
         btn.disabled = true;
-
         const { error } = await _supabase.auth.signUp({ email, password });
-
         if (error) {
           setStatus(error.message);
         } else {
@@ -397,16 +397,13 @@
       async function handleForgotPassword() {
         const email = document.getElementById("forgot-email").value;
         if (!email) return setStatus("Email is required");
-
         const btn = document.getElementById("lbl-forgot-btn");
         const originalText = btn.innerText;
         btn.innerHTML = `Sending... <div class="spinner"></div>`;
         btn.disabled = true;
-
         const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.href,
+          redirectTo: window.location.origin + window.location.pathname,
         });
-
         if (error) {
           setStatus(error.message);
         } else {
@@ -418,16 +415,13 @@
       async function handleUpdatePassword() {
         const newPassword = document.getElementById("new-password").value;
         if (!newPassword) return setStatus("Please enter a new password");
-
         const btn = document.getElementById("lbl-reset-save-btn");
         const originalText = btn.innerText;
         btn.innerHTML = `Saving... <div class="spinner"></div>`;
         btn.disabled = true;
-
         const { error } = await _supabase.auth.updateUser({
           password: newPassword,
         });
-
         if (error) {
           setStatus(error.message);
           resetButton(btn, originalText);
@@ -439,6 +433,7 @@
         }
       }
 
+      // --- Updated window.onload to handle recovery hash immediately ---
       window.onload = () => {
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
@@ -448,9 +443,23 @@
         const savedLang = localStorage.getItem("selectedLang") || "mm";
         changeLang(savedLang);
 
-        _supabase.auth.getSession().then(({ data: { session } }) => {
-          if (!session) showForm("signup");
-        });
+        const isRecovery =
+          window.location.hash &&
+          window.location.hash.includes("type=recovery");
+
+        if (isRecovery) {
+          // Force the reset form if recovery hash is present
+          showForm("reset-password");
+        } else {
+          // Standard login check
+          _supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+              window.location.href = "dashboard.html";
+            } else {
+              showForm("signup");
+            }
+          });
+        }
       };
     </script>
   </body>
