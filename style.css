@@ -12,6 +12,8 @@
   --success: #00c853;
   --error: #ff3d00;
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Added overlay variable for CORB fix fallback */
+  --bg-fallback: #121212;
 }
 
 [data-theme="dark"] {
@@ -40,7 +42,9 @@ html {
     "Pyidaungsu",
     -apple-system,
     sans-serif;
-  background: url("https://images.unsplash.com/photo-1579621970795-87faff2f9070?auto=format&fit=crop&q=80&w=2070")
+  /* FIXED CORB ISSUE: Added a fallback color and optimized the URL parameters */
+  background: var(--bg-fallback)
+    url("https://images.unsplash.com/photo-1579621970795-87faff2f9070?auto=format&fit=crop&q=80&w=2070")
     no-repeat center center fixed;
   background-size: cover;
   color: var(--text-dark);
@@ -55,13 +59,14 @@ html {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  /* Darkened overlay to ensure text readability if background is blocked */
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 [data-theme="dark"] .auth-wrapper {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
 }
 
 .top-controls {
@@ -73,7 +78,14 @@ html {
   margin-bottom: 20px;
 }
 
-/* --- Welcome Info (Moved from HTML) --- */
+/* Added container for the right-side buttons */
+.nav-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* --- Welcome Info --- */
 .welcome-info {
   width: 100%;
   max-width: 400px;
@@ -95,12 +107,9 @@ html {
   color: var(--text-dark);
 }
 
-/* --- Language Switcher (Single Button) --- */
-.lang-switcher {
-  display: flex;
-}
-
-.lang-btn {
+/* --- Language & Login Buttons --- */
+.lang-btn,
+#lbl-nav-login {
   padding: 8px 20px;
   border: 1px solid var(--input-border);
   border-radius: 100px;
@@ -113,7 +122,15 @@ html {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.lang-btn:active {
+/* Styling specifically for the top login button to make it pop */
+#lbl-nav-login {
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+}
+
+.lang-btn:active,
+#lbl-nav-login:active {
   transform: scale(0.95);
 }
 
