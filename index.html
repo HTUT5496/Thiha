@@ -43,6 +43,10 @@
       </div>
 
       <div class="welcome-info">
+        <div class="auth-illustration">
+          <img src="finance-hero.png" alt="Finance Illustration" id="app-img" />
+        </div>
+
         <p id="lbl-app-info">
           ဤ Application ကို သုံးခြင်းအားဖြင့် သင့်၏ ဝင်ငွေ နှင့် ထွက်ငွေ ကို
           ကောင်းစွာ စီမံခန့်ခွဲ နိုင်ပါသည်။
@@ -240,7 +244,6 @@
         localStorage.setItem("selectedLang", lang);
         const data = translations[lang];
 
-        // Corrected mapping: Ensure the ID matches the HTML exactly
         Object.keys(data.labels).forEach((key) => {
           const el = document.getElementById(`lbl-${key}`);
           if (el) el.innerText = data.labels[key];
