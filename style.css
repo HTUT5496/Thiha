@@ -103,7 +103,7 @@ body {
   align-items: center;
   gap: 12px; /* Fixed gap for stability */
   margin: 10px auto 25px auto;
-  width: 100%;
+  width: 50%;
   max-width: 100%; /* Ensures it never exceeds the wrapper/box width */
   perspective: 1000px;
   overflow: visible; /* Allows drop shadow to show but keeps layout contained */
