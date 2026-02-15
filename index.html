@@ -15,35 +15,16 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
-    <style>
-      .welcome-info {
-        width: 100%;
-        max-width: 400px;
-        text-align: center;
-        margin-bottom: 20px;
-        padding: 0 10px;
-        animation: fadeIn 0.8s ease-out;
-      }
-      .welcome-info p {
-        color: #ffffff;
-        font-size: 15px;
-        line-height: 1.6;
-        font-weight: 500;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      }
-      [data-theme="dark"] .welcome-info p {
-        color: var(--text-dark);
-      }
-    </style>
   </head>
   <body>
     <div class="auth-wrapper">
       <div class="top-controls">
         <div class="lang-switcher">
-          <button class="lang-btn" id="btn-mm" onclick="changeLang('mm')">
-            မြန်မာ
-          </button>
-          <button class="lang-btn" id="btn-en" onclick="changeLang('en')">
+          <button
+            class="lang-btn active"
+            id="btn-lang-toggle"
+            onclick="toggleLang()"
+          >
             EN
           </button>
         </div>
@@ -181,6 +162,16 @@
       const supabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
       const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+      async function checkAuth() {
+        const {
+          data: { session },
+        } = await _supabase.auth.getSession();
+        if (session) {
+          window.location.href = "dashboard.html";
+        }
+      }
+      checkAuth();
+
       function togglePass(id, el) {
         const input = document.getElementById(id);
         if (input.type === "password") {
@@ -251,21 +242,34 @@
         localStorage.setItem("theme", newTheme);
       }
 
+      /* --- UPDATED LOGIC FOR SINGLE BUTTON TOGGLE --- */
+      function toggleLang() {
+        const currentLang = localStorage.getItem("selectedLang") || "mm";
+        const newLang = currentLang === "mm" ? "en" : "mm";
+        changeLang(newLang);
+      }
+
       function changeLang(lang) {
         localStorage.setItem("selectedLang", lang);
         const data = translations[lang];
+
+        // Update Labels
         Object.keys(data.labels).forEach((id) => {
           const el = document.getElementById(`lbl-${id}`);
           if (el) el.innerText = data.labels[id];
         });
+
+        // Update Placeholders
         Object.keys(data.placeholders).forEach((id) => {
           const el = document.getElementById(id);
           if (el) el.placeholder = data.placeholders[id];
         });
-        document
-          .querySelectorAll(".lang-btn")
-          .forEach((b) => b.classList.remove("active"));
-        document.getElementById(`btn-${lang}`).classList.add("active");
+
+        // Update Button Text (Show the "Opposite" language or current)
+        const langToggleBtn = document.getElementById("btn-lang-toggle");
+        // If we just switched TO Myanmar, show "EN" on the button (as the option to switch back)
+        // Or show the current active language name. Here we show the current:
+        langToggleBtn.innerText = lang === "mm" ? "မြန်မာ" : "EN";
       }
 
       function showForm(formId) {
@@ -336,7 +340,6 @@
           );
           btn.innerText = originalText;
           btn.disabled = false;
-          // Redirect to login form so user can log in after confirming
           setTimeout(() => showForm("login"), 3000);
         }
       }
@@ -355,10 +358,15 @@
         document.documentElement.setAttribute("data-theme", savedTheme);
         document.getElementById("theme-icon").innerText =
           savedTheme === "dark" ? "☀️" : "🌙";
+
         const savedLang = localStorage.getItem("selectedLang") || "mm";
         changeLang(savedLang);
-        // Show login by default if they came from a registration redirect
-        showForm("signup");
+
+        _supabase.auth.getSession().then(({ data: { session } }) => {
+          if (!session) {
+            showForm("signup");
+          }
+        });
       };
     </script>
   </body>

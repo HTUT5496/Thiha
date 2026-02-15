@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="my">
+<html lang="my" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -9,243 +9,45 @@
     <title>Finance Tracker - Premium Dashboard</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+      // Quick check before anything renders to prevent unauthorized access
+      const tempSupabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
+      const tempSupabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
+      const _tempSupabase = supabase.createClient(
+        tempSupabaseUrl,
+        tempSupabaseKey,
+      );
+
+      _tempSupabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session) {
+          window.location.href = "index.html";
+        }
+      });
+    </script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="dashboard.css" />
-    <style>
-      :root {
-        --primary: #3b82f6;
-        --success: #10b981;
-        --danger: #ef4444;
-        --card-shadow:
-          0 10px 25px -5px rgba(0, 0, 0, 0.05),
-          0 8px 10px -6px rgba(0, 0, 0, 0.05);
-      }
-
-      [data-theme="dark"] {
-        --card-bg: #1e293b;
-        --text-color: #f8fafc;
-        --border-glass: rgba(255, 255, 255, 0.05);
-      }
-
-      body {
-        font-family: "Plus Jakarta Sans", sans-serif;
-        background-color: var(--body-bg, #f1f5f9);
-        color: var(--text-color, #1e293b);
-      }
-
-      /* --- Premium Header --- */
-      .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px 0;
-      }
-      .lang-switcher {
-        display: flex;
-        background: rgba(0, 0, 0, 0.05);
-        padding: 4px;
-        border-radius: 12px;
-      }
-      [data-theme="dark"] .lang-switcher {
-        background: rgba(255, 255, 255, 0.05);
-      }
-
-      .lang-btn {
-        border: none;
-        background: transparent;
-        padding: 6px 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 700;
-        font-size: 11px;
-        transition: 0.3s;
-        color: #64748b;
-      }
-      .lang-btn.active {
-        background: white;
-        color: var(--primary);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-      [data-theme="dark"] .lang-btn.active {
-        background: #334155;
-        color: white;
-      }
-
-      /* --- Category Section --- */
-      .section-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 30px 0 15px;
-      }
-      .section-header hr {
-        flex: 1;
-        border: none;
-        border-top: 1.5px solid var(--border-glass);
-      }
-      .cat-section-title {
-        font-size: 13px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #94a3b8;
-      }
-
-      .category-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-
-      .cat-btn {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 12px;
-        padding: 16px;
-        background: var(--card-bg, #ffffff);
-        border-radius: 18px;
-        border: 1px solid var(--border-glass);
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: var(--card-shadow);
-        text-align: left;
-      }
-      .cat-btn:active {
-        transform: scale(0.96);
-        opacity: 0.8;
-      }
-
-      .icon-box {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-      }
-      .inc-btn .icon-box {
-        background: rgba(16, 185, 129, 0.1);
-        color: var(--success);
-      }
-      .exp-btn .icon-box {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger);
-      }
-
-      .cat-info {
-        display: flex;
-        flex-direction: column;
-      }
-      .cat-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #64748b;
-      }
-      .cat-val {
-        font-size: 15px;
-        font-weight: 700;
-        color: var(--text-color);
-      }
-
-      /* --- Floating History Bar --- */
-      .history-link-container {
-        margin: 20px 0;
-      }
-      .history-card-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        color: white;
-        padding: 16px;
-        border-radius: 18px;
-        text-decoration: none;
-        font-weight: 700;
-        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
-      }
-
-      /* --- Modal Animation --- */
-      .modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(10px);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-      }
-      .modal-content {
-        background: var(--card-bg, #fff);
-        width: 90%;
-        max-width: 360px;
-        padding: 25px;
-        border-radius: 24px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      }
-      @keyframes modalIn {
-        from {
-          opacity: 0;
-          transform: scale(0.9) translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1) translateY(0);
-        }
-      }
-    </style>
   </head>
   <body>
     <div class="container">
       <div class="top-bar">
         <div class="lang-switcher">
-          <button class="lang-btn" id="btn-en" onclick="changeLang('en')">
+          <button class="lang-btn" id="btn-lang-toggle" onclick="toggleLang()">
             ENGLISH
           </button>
-          <button class="lang-btn" id="btn-mm" onclick="changeLang('mm')">
-            မြန်မာ
-          </button>
         </div>
-        <div style="display: flex; gap: 12px">
-          <button
-            id="theme-toggle"
-            onclick="toggleTheme()"
-            style="
-              background: none;
-              border: none;
-              font-size: 20px;
-              cursor: pointer;
-            "
-          >
+        <div class="top-nav-actions">
+          <button id="theme-icon" onclick="toggleTheme()" class="theme-toggle">
             🌙
           </button>
-          <button
-            class="logout-btn"
-            onclick="handleLogout()"
-            style="
-              background: none;
-              border: 1px solid var(--danger);
-              color: var(--danger);
-              padding: 6px 12px;
-              border-radius: 10px;
-              font-size: 11px;
-              font-weight: 700;
-              cursor: pointer;
-            "
-          >
-            LOGOUT
-          </button>
+          <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
         </div>
       </div>
 
@@ -290,50 +92,45 @@
       <div class="category-grid" id="expense-grid"></div>
     </div>
 
-    <div id="addModal" class="modal">
+    <div id="addModal" class="modal-overlay">
       <div class="modal-content">
-        <div style="text-align: center; margin-bottom: 20px">
-          <h3 id="lbl-modal-title" style="margin: 0 0 5px 0">Add Entry</h3>
-          <span
-            id="modal-cat-display"
-            style="color: var(--primary); font-weight: 700; font-size: 14px"
-          ></span>
+        <div class="modal-header-custom">
+          <h3 id="lbl-modal-title">New Transaction</h3>
+          <span id="modal-cat-display"></span>
         </div>
-        <input type="date" id="m-date" />
-        <input
-          type="number"
-          id="m-amount"
-          placeholder="0.00"
-          inputmode="decimal"
-        />
-        <textarea id="m-notes" placeholder="Note" rows="2"></textarea>
-        <button
-          class="main-btn"
-          id="lbl-modal-save"
-          onclick="saveFromModal()"
-          style="
-            width: 100%;
-            border-radius: 14px;
-            padding: 15px;
-            margin-top: 10px;
-          "
-        >
-          Save Record
-        </button>
-        <button
-          onclick="closeModal()"
-          style="
-            width: 100%;
-            background: none;
-            border: none;
-            color: #94a3b8;
-            margin-top: 15px;
-            font-weight: 600;
-            cursor: pointer;
-          "
-        >
-          Cancel
-        </button>
+
+        <div class="form-body">
+          <div class="form-group">
+            <input type="date" id="m-date" />
+          </div>
+          <div class="form-group">
+            <input
+              type="number"
+              id="m-amount"
+              placeholder="0.00"
+              inputmode="decimal"
+            />
+          </div>
+          <div class="form-group">
+            <textarea id="m-notes" placeholder="Note" rows="3"></textarea>
+          </div>
+
+          <button
+            class="btn-save"
+            id="lbl-modal-save"
+            onclick="saveFromModal()"
+          >
+            Save Record
+          </button>
+
+          <button
+            onclick="closeModal()"
+            class="btn-cancel-link"
+            id="lbl-cancel"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
 
@@ -373,10 +170,11 @@
           "nav-history": "မှတ်တမ်းစာမျက်နှာ ကြည့်ရန်",
           incTitle: "ဝင်ငွေ အမျိုးအစားများ",
           expTitle: "အသုံးစရိတ် အမျိုးအစားများ",
-          modalTitle: "စာရင်းအသစ်ထည့်ရန်",
+          modalTitle: "စာရင်းအသစ်",
           modalSave: "သိမ်းဆည်းမည်",
           placeAmt: "ပမာဏ",
           placeNotes: "မှတ်စု",
+          cancel: "မလုပ်တော့ပါ",
           Salary: "လစာ",
           Bonus: "ဆုကြေး",
           Gifts: "လက်ဆောင်",
@@ -401,6 +199,7 @@
           modalSave: "Save Record",
           placeAmt: "Amount",
           placeNotes: "Notes",
+          cancel: "Cancel",
           Salary: "Salary",
           Bonus: "Bonus",
           Gifts: "Gifts",
@@ -445,13 +244,21 @@
         document.getElementById("m-date").valueAsDate = new Date();
         document.getElementById("m-amount").value = "";
         document.getElementById("m-notes").value = "";
-        document.getElementById("lbl-modal-save").style.background =
-          type === "Income" ? "var(--success)" : "var(--danger)";
-        document.getElementById("addModal").style.display = "flex";
+
+        const saveBtn = document.getElementById("lbl-modal-save");
+        // Apply dynamic color based on Income or Expense
+        saveBtn.style.background = type === "Income" ? "#10b981" : "#ef4444";
+        saveBtn.style.boxShadow =
+          type === "Income"
+            ? "0 10px 20px rgba(16, 185, 129, 0.3)"
+            : "0 10px 20px rgba(239, 68, 68, 0.3)";
+
+        document.getElementById("addModal").classList.add("active");
+        setTimeout(() => document.getElementById("m-amount").focus(), 300);
       }
 
       function closeModal() {
-        document.getElementById("addModal").style.display = "none";
+        document.getElementById("addModal").classList.remove("active");
       }
 
       async function saveFromModal() {
@@ -460,8 +267,11 @@
         } = await _supabase.auth.getUser();
         const amt = parseFloat(document.getElementById("m-amount").value);
         if (!amt) return;
+
         const btn = document.getElementById("lbl-modal-save");
         btn.disabled = true;
+        btn.innerText = currentLang === "mm" ? "သိမ်းနေသည်..." : "Saving...";
+
         const { error } = await _supabase.from("transactions").insert([
           {
             date: document.getElementById("m-date").value,
@@ -472,18 +282,28 @@
             user_id: user.id,
           },
         ]);
+
         if (!error) {
           await loadData();
           closeModal();
+        } else {
+          alert(error.message);
         }
         btn.disabled = false;
+        btn.innerText = langData[currentLang].modalSave;
       }
 
       async function loadData() {
         const {
           data: { user },
         } = await _supabase.auth.getUser();
-        const { data } = await _supabase.from("transactions").select("*");
+        if (!user) return;
+
+        const { data } = await _supabase
+          .from("transactions")
+          .select("*")
+          .eq("user_id", user.id);
+
         if (data) {
           let tInc = 0,
             tExp = 0,
@@ -500,6 +320,11 @@
           document.getElementById("val-balance").innerText = (
             tInc - tExp
           ).toLocaleString();
+
+          document
+            .querySelectorAll(".cat-val")
+            .forEach((el) => (el.innerText = "0"));
+
           Object.keys(sums).forEach((c) => {
             const el = document.getElementById(`amt-${c}`);
             if (el) el.innerText = sums[c].toLocaleString();
@@ -507,9 +332,15 @@
         }
       }
 
+      function toggleLang() {
+        const newLang = currentLang === "mm" ? "en" : "mm";
+        changeLang(newLang);
+      }
+
       function changeLang(lang) {
         currentLang = lang;
         localStorage.setItem("selectedLang", lang);
+
         document.getElementById("lbl-income").innerText = langData[lang].income;
         document.getElementById("lbl-expense").innerText =
           langData[lang].expense;
@@ -530,22 +361,23 @@
           langData[lang].placeAmt;
         document.getElementById("m-notes").placeholder =
           langData[lang].placeNotes;
+        document.getElementById("lbl-cancel").innerText = langData[lang].cancel;
+
+        document.getElementById("btn-lang-toggle").innerText =
+          lang === "mm" ? "ENGLISH" : "မြန်မာ";
+
         renderButtons();
         loadData();
-        document
-          .querySelectorAll(".lang-btn")
-          .forEach((b) => b.classList.toggle("active", b.id === `btn-${lang}`));
       }
 
       function toggleTheme() {
-        const target =
-          document.documentElement.getAttribute("data-theme") === "dark"
-            ? "light"
-            : "dark";
-        document.documentElement.setAttribute("data-theme", target);
-        localStorage.setItem("theme", target);
-        document.getElementById("theme-toggle").innerText =
-          target === "dark" ? "☀️" : "🌙";
+        const html = document.documentElement;
+        const icon = document.getElementById("theme-icon");
+        const newTheme =
+          html.getAttribute("data-theme") === "light" ? "dark" : "light";
+        html.setAttribute("data-theme", newTheme);
+        icon.innerText = newTheme === "dark" ? "☀️" : "🌙";
+        localStorage.setItem("theme", newTheme);
       }
 
       async function handleLogout() {
@@ -557,9 +389,16 @@
         const {
           data: { session },
         } = await _supabase.auth.getSession();
-        if (!session) return (window.location.href = "index.html");
+        if (!session) {
+          window.location.href = "index.html";
+          return;
+        }
+
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
+        document.getElementById("theme-icon").innerText =
+          savedTheme === "dark" ? "☀️" : "🌙";
+
         changeLang(localStorage.getItem("selectedLang") || "mm");
       };
     </script>

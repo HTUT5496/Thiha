@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="my">
+<html lang="my" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -9,6 +9,21 @@
     <title>Finance Tracker - Full History</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+      const tempSupabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
+      const tempSupabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
+      const _tempSupabase = supabase.createClient(
+        tempSupabaseUrl,
+        tempSupabaseKey,
+      );
+
+      _tempSupabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session) {
+          window.location.href = "index.html";
+        }
+      });
+    </script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
@@ -31,15 +46,17 @@
         </button>
 
         <div class="header-right">
-          <button class="theme-toggle" onclick="toggleDarkMode()">
-            <i class="fa-solid fa-moon" id="theme-icon"></i>
+          <button class="theme-toggle" id="theme-icon" onclick="toggleTheme()">
+            🌙
           </button>
+
           <div class="lang-switcher">
-            <button class="lang-btn" id="btn-en" onclick="changeLang('en')">
-              EN
-            </button>
-            <button class="lang-btn" id="btn-mm" onclick="changeLang('mm')">
-              MM
+            <button
+              class="lang-btn"
+              id="btn-lang-toggle"
+              onclick="toggleLang()"
+            >
+              ENGLISH
             </button>
           </div>
         </div>
@@ -203,15 +220,20 @@
         filterData();
       }
 
-      function toggleDarkMode() {
-        const target =
-          document.documentElement.getAttribute("data-theme") === "dark"
-            ? "light"
-            : "dark";
-        document.documentElement.setAttribute("data-theme", target);
-        localStorage.setItem("theme", target);
-        document.getElementById("theme-icon").className =
-          target === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
+      /* --- Updated toggleTheme to match index.html --- */
+      function toggleTheme() {
+        const html = document.documentElement;
+        const icon = document.getElementById("theme-icon");
+        const newTheme =
+          html.getAttribute("data-theme") === "light" ? "dark" : "light";
+        html.setAttribute("data-theme", newTheme);
+        icon.innerText = newTheme === "dark" ? "☀️" : "🌙";
+        localStorage.setItem("theme", newTheme);
+      }
+
+      function toggleLang() {
+        const newLang = currentLang === "mm" ? "en" : "mm";
+        changeLang(newLang);
       }
 
       function changeLang(lang) {
@@ -231,9 +253,9 @@
         document.getElementById("search-bar").placeholder =
           langData[lang].searchPlaceholder;
 
-        document
-          .querySelectorAll(".lang-btn")
-          .forEach((b) => b.classList.toggle("active", b.id === `btn-${lang}`));
+        document.getElementById("btn-lang-toggle").innerText =
+          lang === "mm" ? "ENGLISH" : "မြန်မာ";
+
         renderList(allData);
       }
 
@@ -256,10 +278,10 @@
         } = await _supabase.auth.getUser();
         if (!user) return (window.location.href = "index.html");
 
-        // SORT BY ID DESC: Ensures most recently created or updated record stays on top
         let query = _supabase
           .from("transactions")
           .select("*")
+          .eq("user_id", user.id)
           .order("id", { ascending: false });
 
         const df = document.getElementById("date-from").value;
@@ -406,12 +428,22 @@
         a.click();
       }
 
-      window.onload = () => {
+      window.onload = async () => {
+        const {
+          data: { session },
+        } = await _supabase.auth.getSession();
+        if (!session) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        /* --- Updated persistence logic to match index.html --- */
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
-        document.getElementById("theme-icon").className =
-          savedTheme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
-        changeLang(currentLang);
+        document.getElementById("theme-icon").innerText =
+          savedTheme === "dark" ? "☀️" : "🌙";
+
+        changeLang(localStorage.getItem("selectedLang") || "mm");
         loadFullHistory();
       };
     </script>

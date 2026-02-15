@@ -1,13 +1,31 @@
 <!doctype html>
-<html lang="my">
+<html lang="my" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Add Transaction</title>
+    <title>Add Transaction - Finance Tracker</title>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+      // Authentication Guard
+      const tempSupabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
+      const tempSupabaseKey = "sb_publishable_uih5zl6drERvSSf0AN4qmQ_MqX8SY8G";
+      const _tempSupabase = supabase.createClient(
+        tempSupabaseUrl,
+        tempSupabaseKey,
+      );
+
+      _tempSupabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session) {
+          window.location.href = "index.html";
+        }
+      });
+    </script>
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
@@ -35,15 +53,16 @@
         </div>
 
         <div class="nav-right">
-          <button class="btn-nav" id="theme-toggle" onclick="toggleTheme()">
-            <i class="fa-solid fa-moon" id="theme-icon"></i>
+          <button class="theme-toggle" id="theme-icon" onclick="toggleTheme()">
+            🌙
           </button>
           <div class="lang-switcher">
-            <button class="lang-btn" id="btn-en" onclick="changeLang('en')">
-              EN
-            </button>
-            <button class="lang-btn" id="btn-mm" onclick="changeLang('mm')">
-              MM
+            <button
+              class="lang-btn"
+              id="btn-lang-toggle"
+              onclick="toggleLang()"
+            >
+              ENGLISH
             </button>
           </div>
         </div>
@@ -73,32 +92,40 @@
 
     <div class="modal-overlay" id="modalOverlay">
       <div class="modal-content">
-        <div class="modal-header">
-          <div class="modal-title-group">
-            <i id="modalIcon" class="fa-solid"></i>
-            <h3 id="modalTitle">Category</h3>
-          </div>
-          <button class="close-modal" onclick="closeModal()">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+        <div class="modal-header-custom">
+          <h3 id="lbl-modal-title">New Transaction</h3>
+          <span id="modalTitle">Category</span>
         </div>
 
         <form id="txForm">
           <div class="form-group">
-            <label id="lbl-amt">Amount</label>
-            <input type="number" id="amount" placeholder="0" required />
-          </div>
-          <div class="form-group">
-            <label id="lbl-date">Date</label>
             <input type="date" id="date" required />
           </div>
           <div class="form-group">
-            <label id="lbl-note">Note</label>
-            <textarea id="notes" rows="2" placeholder="..."></textarea>
+            <input
+              type="number"
+              id="amount"
+              placeholder="Amount"
+              inputmode="decimal"
+              required
+            />
           </div>
+          <div class="form-group">
+            <textarea id="notes" rows="3" placeholder="Notes"></textarea>
+          </div>
+
           <button type="submit" class="btn-save" id="btnSave">
             <div class="spinner" id="loader"></div>
-            <span id="btnText">Save</span>
+            <span id="btnText">Save Record</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn-cancel-link"
+            onclick="closeModal()"
+            id="lbl-cancel"
+          >
+            Cancel
           </button>
         </form>
       </div>
@@ -115,14 +142,14 @@
 
       const langData = {
         mm: {
-          back: "Back",
-          home: "ပင်မ",
+          back: "နောက်သို့",
           inc: "ဝင်ငွေ",
           exp: "အသုံးစရိတ်",
+          newTx: "စာရင်းအသစ်",
           amt: "ပမာဏ",
-          date: "ရက်စွဲ",
           note: "မှတ်စု",
-          save: "သိမ်းမည်",
+          cancel: "မလုပ်တော့ပါ",
+          save: "သိမ်းဆည်းမည်",
           saving: "သိမ်းနေသည်...",
           Salary: "လစာ",
           Bonus: "ဆုကြေး",
@@ -139,13 +166,13 @@
         },
         en: {
           back: "Back",
-          home: "Home",
           inc: "Income",
           exp: "Expense",
+          newTx: "New Transaction",
           amt: "Amount",
-          date: "Date",
-          note: "Note",
-          save: "Save",
+          note: "Notes",
+          cancel: "Cancel",
+          save: "Save Record",
           saving: "Saving...",
           Salary: "Salary",
           Bonus: "Bonus",
@@ -181,20 +208,11 @@
         ],
       };
 
-      // --- Navigation Logic ---
-      document.getElementById("btnBack").onclick = function () {
-        // If there's no history to go back to (e.g. opened in new tab), go to history.html
-        if (window.history.length <= 1) {
-          window.location.href = "history.html";
-        } else {
-          window.history.back();
-        }
-      };
+      document.getElementById("btnBack").onclick = () => window.history.back();
 
-      // --- Language & Theme Logic ---
-      function changeLang(lang) {
-        currentLang = lang;
-        localStorage.setItem("selectedLang", lang);
+      function toggleLang() {
+        currentLang = currentLang === "mm" ? "en" : "mm";
+        localStorage.setItem("selectedLang", currentLang);
         applyLanguage();
       }
 
@@ -203,39 +221,26 @@
         document.getElementById("lbl-back").innerText = d.back;
         document.getElementById("btn-inc").innerText = d.inc;
         document.getElementById("btn-exp").innerText = d.exp;
-        document.getElementById("lbl-amt").innerText = d.amt;
-        document.getElementById("lbl-date").innerText = d.date;
-        document.getElementById("lbl-note").innerText = d.note;
+        document.getElementById("lbl-modal-title").innerText = d.newTx;
+        document.getElementById("amount").placeholder = d.amt;
+        document.getElementById("notes").placeholder = d.note;
+        document.getElementById("lbl-cancel").innerText = d.cancel;
         document.getElementById("btnText").innerText = d.save;
-        document
-          .getElementById("btn-en")
-          .classList.toggle("active", currentLang === "en");
-        document
-          .getElementById("btn-mm")
-          .classList.toggle("active", currentLang === "mm");
+        document.getElementById("btn-lang-toggle").innerText =
+          currentLang === "mm" ? "ENGLISH" : "မြန်မာ";
         renderGrid();
       }
 
       function toggleTheme() {
-        const currentTheme =
-          document.documentElement.getAttribute("data-theme") === "dark"
-            ? "light"
-            : "dark";
-        document.documentElement.setAttribute("data-theme", currentTheme);
-        localStorage.setItem("theme", currentTheme);
-        updateThemeIcon();
+        const html = document.documentElement;
+        const newTheme =
+          html.getAttribute("data-theme") === "light" ? "dark" : "light";
+        html.setAttribute("data-theme", newTheme);
+        document.getElementById("theme-icon").innerText =
+          newTheme === "dark" ? "☀️" : "🌙";
+        localStorage.setItem("theme", newTheme);
       }
 
-      function updateThemeIcon() {
-        const theme = document.documentElement.getAttribute("data-theme");
-        const icon = document.getElementById("theme-icon");
-        if (icon) {
-          icon.className =
-            theme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
-        }
-      }
-
-      // --- Page Logic ---
       function setType(type) {
         selectedType = type;
         document
@@ -251,10 +256,10 @@
         grid.innerHTML = categories[selectedType]
           .map(
             (cat) => `
-            <div class="cat-card" onclick="openModal('${cat.id}', '${cat.icon}', '${cat.color}')">
-                <i class="fa-solid ${cat.icon}" style="color: ${cat.color}"></i>
-                <span>${langData[currentLang][cat.id] || cat.id}</span>
-            </div>
+          <div class="cat-card" onclick="openModal('${cat.id}', '${cat.icon}', '${cat.color}')">
+            <i class="fa-solid ${cat.icon}" style="color: ${cat.color}"></i>
+            <span>${langData[currentLang][cat.id]}</span>
+          </div>
         `,
           )
           .join("");
@@ -263,16 +268,19 @@
       function openModal(id, icon, color) {
         activeCategory = id;
         document.getElementById("modalTitle").innerText =
-          langData[currentLang][id] || id;
-        const iconEl = document.getElementById("modalIcon");
-        iconEl.className = `fa-solid ${icon}`;
-        iconEl.style.color = color;
-        document.getElementById("modalOverlay").classList.add("active");
+          langData[currentLang][id];
 
-        // Timeout to ensure focus happens after modal transition
-        setTimeout(() => {
-          document.getElementById("amount").focus();
-        }, 300);
+        // Dynamically style the save button based on type
+        const saveBtn = document.getElementById("btnSave");
+        saveBtn.style.background =
+          selectedType === "Income" ? "#10b981" : "#ef4444";
+        saveBtn.style.boxShadow =
+          selectedType === "Income"
+            ? "0 10px 20px rgba(16, 185, 129, 0.3)"
+            : "0 10px 20px rgba(239, 68, 68, 0.3)";
+
+        document.getElementById("modalOverlay").classList.add("active");
+        setTimeout(() => document.getElementById("amount").focus(), 300);
       }
 
       function closeModal() {
@@ -281,52 +289,49 @@
         document.getElementById("date").valueAsDate = new Date();
       }
 
-      window.onclick = (e) => {
-        if (e.target == document.getElementById("modalOverlay")) closeModal();
-      };
-
-      // --- Initialize ---
-      const savedTheme = localStorage.getItem("theme") || "dark";
-      document.documentElement.setAttribute("data-theme", savedTheme);
-      updateThemeIcon();
-      document.getElementById("date").valueAsDate = new Date();
-      applyLanguage();
-      setType("Income");
-
       document.getElementById("txForm").onsubmit = async (e) => {
         e.preventDefault();
         const btnSave = document.getElementById("btnSave");
+        const loader = document.getElementById("loader");
+        const btnText = document.getElementById("btnText");
+
         btnSave.disabled = true;
-        document.getElementById("loader").style.display = "block";
-        document.getElementById("btnText").innerText =
-          langData[currentLang].saving;
+        loader.style.display = "block";
+        btnText.innerText = langData[currentLang].saving;
 
-        try {
-          const {
-            data: { user },
-          } = await _supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await _supabase.auth.getUser();
 
-          if (!user) throw new Error("User not authenticated");
+        const { error } = await _supabase.from("transactions").insert([
+          {
+            user_id: user.id,
+            amount: parseFloat(document.getElementById("amount").value),
+            category: activeCategory,
+            date: document.getElementById("date").value,
+            notes: document.getElementById("notes").value,
+            type: selectedType,
+          },
+        ]);
 
-          const { error } = await _supabase.from("transactions").insert([
-            {
-              user_id: user.id,
-              amount: parseFloat(document.getElementById("amount").value),
-              category: activeCategory,
-              date: document.getElementById("date").value,
-              notes: document.getElementById("notes").value,
-              type: selectedType,
-            },
-          ]);
-          if (error) throw error;
+        if (!error) {
           window.location.href = "history.html";
-        } catch (err) {
-          alert(err.message);
+        } else {
+          alert(error.message);
           btnSave.disabled = false;
-          document.getElementById("loader").style.display = "none";
-          document.getElementById("btnText").innerText =
-            langData[currentLang].save;
+          loader.style.display = "none";
+          btnText.innerText = langData[currentLang].save;
         }
+      };
+
+      window.onload = () => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        document.getElementById("theme-icon").innerText =
+          savedTheme === "dark" ? "☀️" : "🌙";
+        document.getElementById("date").valueAsDate = new Date();
+        applyLanguage();
+        setType("Income");
       };
     </script>
   </body>
