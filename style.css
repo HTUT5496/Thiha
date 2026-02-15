@@ -155,7 +155,7 @@ body {
 /* Auth Card: Auto-adjusts spacing */
 .auth-card {
   background: var(--card-bg);
-  padding: clamp(20px, 5vw, 32px);
+  padding: clamp(15px, 5vw, 1px);
   border-radius: 30px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
