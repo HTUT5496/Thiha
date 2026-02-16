@@ -36,9 +36,16 @@
   <body>
     <div class="container">
       <div class="top-bar">
-        <div class="user-info" id="user-profile">
-          <span id="user-name">Loading...</span>
+        <div id="user-profile">
+          <div class="profile-box">
+            <div class="avatar-placeholder">...</div>
+            <div class="user-details">
+              <span class="welcome-text">Mingalarpar</span>
+              <span id="user-name">Loading...</span>
+            </div>
+          </div>
         </div>
+
         <div class="top-nav-actions">
           <button class="lang-btn" id="btn-lang-toggle" onclick="toggleLang()">
             ENGLISH
@@ -209,6 +216,7 @@
           Travel: "ခရီးစရိတ်",
           Health: "ကျန်းမာရေး",
           Other: "အခြား",
+          greet: "မင်္ဂလာပါ",
         },
         en: {
           income: "Income",
@@ -236,6 +244,7 @@
           Travel: "Travel",
           Health: "Health",
           Other: "Other",
+          greet: "Mingalarpar",
         },
       };
 
@@ -324,13 +333,20 @@
         } = await _supabase.auth.getUser();
         if (!user) return;
 
-        // Display User Details from Google Profile
+        // Display Premium User Details
         if (user.user_metadata) {
           const name = user.user_metadata.full_name || user.email;
           const avatar = user.user_metadata.avatar_url;
+          const greeting = langData[currentLang].greet;
+
           document.getElementById("user-profile").innerHTML = `
-                ${avatar ? `<img src="${avatar}" class="profile-img" alt="avatar">` : ""}
-                <span id="user-name">${name}</span>
+              <div class="profile-box">
+                ${avatar ? `<img src="${avatar}" class="profile-img" alt="avatar">` : `<div class="avatar-placeholder">${name.charAt(0)}</div>`}
+                <div class="user-details">
+                    <span class="welcome-text">${greeting},</span>
+                    <span id="user-name">${name}</span>
+                </div>
+              </div>
             `;
         }
 
