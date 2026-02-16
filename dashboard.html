@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Finance Tracker - Premium Dashboard</title>
+    <title>FMS- Premium Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       const tempSupabaseUrl = "https://utvivcjbmyhsmkjfqgra.supabase.co";
@@ -15,9 +15,11 @@
         tempSupabaseUrl,
         tempSupabaseKey,
       );
+
+      // Verification logic with fixed path for GitHub Pages subfolder
       _tempSupabase.auth.getSession().then(({ data: { session } }) => {
         if (!session) {
-          window.location.href = "index.html";
+          window.location.href = "https://htut5496.github.io/Thiha/index.html";
         }
       });
     </script>
@@ -30,84 +32,17 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="dashboard.css" />
-    <style>
-      /* Summary Grid - 3 boxes in a row */
-      .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-      .summary-card {
-        padding: 15px 10px;
-        border-radius: 16px;
-        text-align: center;
-      }
-      .summary-card .amount {
-        font-size: 1.1rem;
-        margin-top: 5px;
-      }
-
-      /* Tab Styling */
-      .tab-container {
-        display: flex;
-        background: rgba(0, 0, 0, 0.05);
-        padding: 5px;
-        border-radius: 12px;
-        margin-bottom: 20px;
-      }
-      .tab-btn {
-        flex: 1;
-        padding: 10px;
-        border: none;
-        border-radius: 10px;
-        background: transparent;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.3s;
-        color: var(--text-color);
-      }
-      .tab-btn.active {
-        background: var(--card-bg);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      }
-
-      /* Category Grid Overrides */
-      .category-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-      }
-      .section-hidden {
-        display: none;
-      }
-
-      .view-history-btn {
-        width: 100%;
-        padding: 12px;
-        margin-top: 20px;
-        border: 2px solid var(--primary-color);
-        background: transparent;
-        color: var(--primary-color);
-        border-radius: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-      }
-    </style>
   </head>
   <body>
     <div class="container">
       <div class="top-bar">
-        <div class="lang-switcher">
+        <div class="user-info" id="user-profile">
+          <span id="user-name">Loading...</span>
+        </div>
+        <div class="top-nav-actions">
           <button class="lang-btn" id="btn-lang-toggle" onclick="toggleLang()">
             ENGLISH
           </button>
-        </div>
-        <div class="top-nav-actions">
           <button id="theme-icon" onclick="toggleTheme()" class="theme-toggle">
             🌙
           </button>
@@ -226,7 +161,6 @@
       let activeType = "";
       let activeCat = "";
 
-      // CATEGORY CONFIG UPDATED AS PER USER REQUEST
       const catConfig = {
         Income: {
           Salary: "fa-wallet",
@@ -389,6 +323,17 @@
           data: { user },
         } = await _supabase.auth.getUser();
         if (!user) return;
+
+        // Display User Details from Google Profile
+        if (user.user_metadata) {
+          const name = user.user_metadata.full_name || user.email;
+          const avatar = user.user_metadata.avatar_url;
+          document.getElementById("user-profile").innerHTML = `
+                ${avatar ? `<img src="${avatar}" class="profile-img" alt="avatar">` : ""}
+                <span id="user-name">${name}</span>
+            `;
+        }
+
         const { data } = await _supabase
           .from("transactions")
           .select("*")
@@ -410,6 +355,7 @@
           document.getElementById("val-balance").innerText = (
             tInc - tExp
           ).toLocaleString();
+
           document
             .querySelectorAll(".cat-val")
             .forEach((el) => (el.innerText = "0"));
@@ -458,7 +404,7 @@
 
       async function handleLogout() {
         await _supabase.auth.signOut();
-        window.location.href = "index.html";
+        window.location.href = "https://htut5496.github.io/Thiha/index.html";
       }
 
       window.onload = async () => {
