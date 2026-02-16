@@ -16,7 +16,6 @@
         tempSupabaseKey,
       );
 
-      // Verification logic with fixed path for GitHub Pages subfolder
       _tempSupabase.auth.getSession().then(({ data: { session } }) => {
         if (!session) {
           window.location.href = "https://htut5496.github.io/Thiha/index.html";
@@ -36,24 +35,36 @@
   <body>
     <div class="container">
       <div class="top-bar">
-        <div id="user-profile">
-          <div class="profile-box">
-            <div class="avatar-placeholder">...</div>
-            <div class="user-details">
-              <span class="welcome-text">Mingalarpar</span>
-              <span id="user-name">Loading...</span>
+        <div
+          class="profile-container"
+          id="profile-trigger"
+          onclick="toggleProfileDropdown()"
+        >
+          <div id="user-profile">
+            <div class="profile-box">
+              <div class="avatar-placeholder">...</div>
+              <div class="user-details">
+                <span class="welcome-text">Mingalarpar</span>
+                <span id="user-name">Loading...</span>
+              </div>
             </div>
+          </div>
+
+          <div class="profile-dropdown" id="logout-dropdown">
+            <button class="logout-btn-dropdown" onclick="handleLogout()">
+              <i class="fa-solid fa-right-from-bracket"></i>
+              <span id="lbl-logout-text">Logout</span>
+            </button>
           </div>
         </div>
 
         <div class="top-nav-actions">
-          <button class="lang-btn" id="btn-lang-toggle" onclick="toggleLang()">
-            ENGLISH
-          </button>
           <button id="theme-icon" onclick="toggleTheme()" class="theme-toggle">
             🌙
           </button>
-          <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
+          <button class="lang-btn" id="btn-lang-toggle" onclick="toggleLang()">
+            ENGLISH
+          </button>
         </div>
       </div>
 
@@ -203,6 +214,8 @@
           placeAmt: "ပမာဏ",
           placeNotes: "မှတ်စု",
           cancel: "မလုပ်တော့ပါ",
+          greet: "မင်္ဂလာပါ",
+          logout: "ထွက်ရန်",
           Salary: "လစာ",
           Bonus: "ဆုကြေး",
           Investment: "ရင်းနှီးမြှုပ်နှံမှု",
@@ -216,7 +229,6 @@
           Travel: "ခရီးစရိတ်",
           Health: "ကျန်းမာရေး",
           Other: "အခြား",
-          greet: "မင်္ဂလာပါ",
         },
         en: {
           income: "Income",
@@ -231,6 +243,8 @@
           placeAmt: "Amount",
           placeNotes: "Notes",
           cancel: "Cancel",
+          greet: "Mingalarpar",
+          logout: "Logout",
           Salary: "Salary",
           Bonus: "Bonus",
           Investment: "Invest",
@@ -244,8 +258,20 @@
           Travel: "Travel",
           Health: "Health",
           Other: "Other",
-          greet: "Mingalarpar",
         },
+      };
+
+      function toggleProfileDropdown() {
+        document.getElementById("logout-dropdown").classList.toggle("active");
+      }
+
+      window.onclick = function (event) {
+        if (!event.target.closest("#profile-trigger")) {
+          const dropdown = document.getElementById("logout-dropdown");
+          if (dropdown && dropdown.classList.contains("active")) {
+            dropdown.classList.remove("active");
+          }
+        }
       };
 
       function switchSection(type) {
@@ -271,8 +297,7 @@
             const btn = document.createElement("button");
             btn.className = `cat-btn ${type === "Income" ? "inc-btn" : "exp-btn"}`;
             btn.onclick = () => openModal(type, cat);
-            btn.innerHTML = `
-              <div class="icon-box"><i class="fa-solid ${catConfig[type][cat]}"></i></div>
+            btn.innerHTML = `<div class="icon-box"><i class="fa-solid ${catConfig[type][cat]}"></i></div>
               <div class="cat-info">
                 <span class="cat-label">${langData[currentLang][cat] || cat}</span>
                 <span class="cat-val" id="amt-${cat.replace(/\s/g, "")}">0</span>
@@ -292,8 +317,8 @@
         document.getElementById("m-date").valueAsDate = new Date();
         document.getElementById("m-amount").value = "";
         document.getElementById("m-notes").value = "";
-        const saveBtn = document.getElementById("lbl-modal-save");
-        saveBtn.style.background = type === "Income" ? "#10b981" : "#ef4444";
+        document.getElementById("lbl-modal-save").style.background =
+          type === "Income" ? "#10b981" : "#ef4444";
         document.getElementById("addModal").classList.add("active");
         setTimeout(() => document.getElementById("m-amount").focus(), 300);
       }
@@ -332,24 +357,16 @@
           data: { user },
         } = await _supabase.auth.getUser();
         if (!user) return;
-
-        // Display Premium User Details
         if (user.user_metadata) {
           const name = user.user_metadata.full_name || user.email;
           const avatar = user.user_metadata.avatar_url;
           const greeting = langData[currentLang].greet;
-
-          document.getElementById("user-profile").innerHTML = `
-              <div class="profile-box">
+          document.getElementById("user-profile").innerHTML =
+            `<div class="profile-box">
                 ${avatar ? `<img src="${avatar}" class="profile-img" alt="avatar">` : `<div class="avatar-placeholder">${name.charAt(0)}</div>`}
-                <div class="user-details">
-                    <span class="welcome-text">${greeting},</span>
-                    <span id="user-name">${name}</span>
-                </div>
-              </div>
-            `;
+                <div class="user-details"><span class="welcome-text">${greeting},</span><span id="user-name">${name}</span></div>
+              </div>`;
         }
-
         const { data } = await _supabase
           .from("transactions")
           .select("*")
@@ -371,7 +388,6 @@
           document.getElementById("val-balance").innerText = (
             tInc - tExp
           ).toLocaleString();
-
           document
             .querySelectorAll(".cat-val")
             .forEach((el) => (el.innerText = "0"));
@@ -402,6 +418,8 @@
           langData[lang].viewInc;
         document.getElementById("lbl-view-exp").innerText =
           langData[lang].viewExp;
+        document.getElementById("lbl-logout-text").innerText =
+          langData[lang].logout;
         document.getElementById("btn-lang-toggle").innerText =
           lang === "mm" ? "ENGLISH" : "မြန်မာ";
         renderButtons();
