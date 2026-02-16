@@ -195,7 +195,9 @@
           data: { session },
         } = await _supabase.auth.getSession();
         if (session && !isRecovery) {
-          window.location.href = "dashboard.html";
+          // Fixed path for GitHub Pages subfolder
+          window.location.href =
+            "https://htut5496.github.io/Thiha/dashboard.html";
         }
       }
       checkAuth();
@@ -325,7 +327,9 @@
           setStatus(error.message);
           btn.disabled = false;
         } else {
-          window.location.href = "dashboard.html";
+          // Fixed path for login redirect
+          window.location.href =
+            "https://htut5496.github.io/Thiha/dashboard.html";
         }
       }
 
@@ -349,7 +353,8 @@
         const { error } = await _supabase.auth.signInWithOAuth({
           provider: "google",
           options: {
-            redirectTo: window.location.origin + "/dashboard.html",
+            // Fixed redirectTo to include the /Thiha/ subfolder
+            redirectTo: "https://htut5496.github.io/Thiha/dashboard.html",
           },
         });
         if (error) setStatus(error.message);
