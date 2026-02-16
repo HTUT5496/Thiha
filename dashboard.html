@@ -31,16 +31,71 @@
     />
     <link rel="stylesheet" href="dashboard.css" />
     <style>
-      /* Quick Title Overrides for Font Size */
-      .summary-card small {
-        font-size: 13px !important;
-        letter-spacing: 0.5px;
+      /* Summary Grid - 3 boxes in a row */
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
       }
-      .summary-card.bal small {
-        font-size: 14px !important;
+      .summary-card {
+        padding: 15px 10px;
+        border-radius: 16px;
+        text-align: center;
       }
-      .cat-section-title {
-        font-size: 13px !important;
+      .summary-card .amount {
+        font-size: 1.1rem;
+        margin-top: 5px;
+      }
+
+      /* Tab Styling */
+      .tab-container {
+        display: flex;
+        background: rgba(0, 0, 0, 0.05);
+        padding: 5px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+      }
+      .tab-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        color: var(--text-color);
+      }
+      .tab-btn.active {
+        background: var(--card-bg);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Category Grid Overrides */
+      .category-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+      .section-hidden {
+        display: none;
+      }
+
+      .view-history-btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        border: 2px solid var(--primary-color);
+        background: transparent;
+        color: var(--primary-color);
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
       }
     </style>
   </head>
@@ -69,7 +124,6 @@
           <small id="lbl-income">Income</small>
           <p class="amount" id="val-income">0</p>
         </div>
-
         <div
           class="summary-card exp"
           onclick="window.location.href = 'history.html?filter=expense'"
@@ -78,35 +132,50 @@
           <small id="lbl-expense">Expense</small>
           <p class="amount" id="val-expense">0</p>
         </div>
-
         <div class="summary-card bal">
           <small id="lbl-balance">Balance</small>
           <p class="amount" id="val-balance">0</p>
         </div>
       </div>
 
-      <div class="history-link-container">
-        <a href="history.html" class="history-card-link" id="lbl-nav-history">
-          <i class="fa-solid fa-clock-rotate-left"></i>
-          <span>Transaction History</span>
-        </a>
+      <div class="tab-container">
+        <button
+          class="tab-btn active"
+          id="tab-inc-head"
+          onclick="switchSection('income')"
+        >
+          Income Sources
+        </button>
+        <button
+          class="tab-btn"
+          id="tab-exp-head"
+          onclick="switchSection('expense')"
+        >
+          Expense Categories
+        </button>
       </div>
 
       <div class="dashboard-main">
-        <div class="income-section">
-          <div class="section-header">
-            <h3 class="cat-section-title" id="lbl-inc-title">Income</h3>
-            <hr />
-          </div>
+        <div id="income-section" class="section-content">
           <div class="category-grid" id="income-grid"></div>
+          <button
+            class="view-history-btn"
+            onclick="window.location.href = 'history.html?filter=income'"
+          >
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span id="lbl-view-inc">View Income History</span>
+          </button>
         </div>
 
-        <div class="expense-section">
-          <div class="section-header">
-            <h3 class="cat-section-title" id="lbl-exp-title">Expense</h3>
-            <hr />
-          </div>
+        <div id="expense-section" class="section-content section-hidden">
           <div class="category-grid" id="expense-grid"></div>
+          <button
+            class="view-history-btn"
+            onclick="window.location.href = 'history.html?filter=expense'"
+          >
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span id="lbl-view-exp">View Expense History</span>
+          </button>
         </div>
       </div>
     </div>
@@ -157,22 +226,25 @@
       let activeType = "";
       let activeCat = "";
 
+      // CATEGORY CONFIG UPDATED AS PER USER REQUEST
       const catConfig = {
         Income: {
           Salary: "fa-wallet",
           Bonus: "fa-gift",
-          Gifts: "fa-hand-holding-heart",
           Investment: "fa-chart-line",
+          "Mote Pho": "fa-cookie",
+          TransferIn: "fa-arrow-down-left",
+          Gift: "fa-hand-holding-heart",
           Other: "fa-plus",
         },
         Expense: {
           Food: "fa-utensils",
-          Transport: "fa-car",
           Shopping: "fa-bag-shopping",
-          Rent: "fa-house",
+          Bill: "fa-credit-card",
+          TransferOut: "fa-arrow-up-right",
+          Travel: "fa-car",
           Health: "fa-heart-pulse",
-          Bills: "fa-credit-card",
-          General: "fa-tags",
+          Other: "fa-tags",
         },
       };
 
@@ -181,9 +253,10 @@
           income: "ဝင်ငွေ",
           expense: "အသုံးစရိတ်",
           balance: "လက်ကျန်",
-          "nav-history": "မှတ်တမ်းစာမျက်နှာ ကြည့်ရန်",
           incTitle: "ဝင်ငွေ အမျိုးအစားများ",
           expTitle: "အသုံးစရိတ် အမျိုးအစားများ",
+          viewInc: "ဝင်ငွေမှတ်တမ်း ကြည့်ရန်",
+          viewExp: "အသုံးစရိတ်မှတ်တမ်း ကြည့်ရန်",
           modalTitle: "စာရင်းအသစ်",
           modalSave: "သိမ်းဆည်းမည်",
           placeAmt: "ပမာဏ",
@@ -191,24 +264,26 @@
           cancel: "မလုပ်တော့ပါ",
           Salary: "လစာ",
           Bonus: "ဆုကြေး",
-          Gifts: "လက်ဆောင်",
           Investment: "ရင်းနှီးမြှုပ်နှံမှု",
-          Other: "အခြား",
+          "Mote Pho": "မုန့်ဖိုး",
+          TransferIn: "လွှဲဝင်ငွေ",
+          Gift: "လက်ဆောင်",
           Food: "စားစရိတ်",
-          Transport: "ခရီးစရိတ်",
           Shopping: "ဝယ်ယူမှု",
-          Rent: "အိမ်လခ",
+          Bill: "ဘေလ်/မီတာ",
+          TransferOut: "လွှဲထွက်ငွေ",
+          Travel: "ခရီးစရိတ်",
           Health: "ကျန်းမာရေး",
-          Bills: "မီတာ/ဘေလ်",
-          General: "အထွေထွေ",
+          Other: "အခြား",
         },
         en: {
           income: "Income",
           expense: "Expense",
           balance: "Balance",
-          "nav-history": "View History Page",
           incTitle: "Income Sources",
           expTitle: "Expense Categories",
+          viewInc: "View Income History",
+          viewExp: "View Expense History",
           modalTitle: "New Transaction",
           modalSave: "Save Record",
           placeAmt: "Amount",
@@ -216,18 +291,34 @@
           cancel: "Cancel",
           Salary: "Salary",
           Bonus: "Bonus",
-          Gifts: "Gifts",
           Investment: "Invest",
-          Other: "Other",
+          "Mote Pho": "Mote Pho",
+          TransferIn: "Transfer In",
+          Gift: "Gift",
           Food: "Food",
-          Transport: "Transport",
           Shopping: "Shopping",
-          Rent: "Rent",
+          Bill: "Bill",
+          TransferOut: "Transfer Out",
+          Travel: "Travel",
           Health: "Health",
-          Bills: "Bills",
-          General: "General",
+          Other: "Other",
         },
       };
+
+      function switchSection(type) {
+        document
+          .getElementById("income-section")
+          .classList.toggle("section-hidden", type !== "income");
+        document
+          .getElementById("expense-section")
+          .classList.toggle("section-hidden", type !== "expense");
+        document
+          .getElementById("tab-inc-head")
+          .classList.toggle("active", type === "income");
+        document
+          .getElementById("tab-exp-head")
+          .classList.toggle("active", type === "expense");
+      }
 
       function renderButtons() {
         const createGrid = (type, target) => {
@@ -240,8 +331,8 @@
             btn.innerHTML = `
               <div class="icon-box"><i class="fa-solid ${catConfig[type][cat]}"></i></div>
               <div class="cat-info">
-                <span class="cat-label">${langData[currentLang][cat]}</span>
-                <span class="cat-val" id="amt-${cat}">0</span>
+                <span class="cat-label">${langData[currentLang][cat] || cat}</span>
+                <span class="cat-val" id="amt-${cat.replace(/\s/g, "")}">0</span>
               </div>`;
             container.appendChild(btn);
           });
@@ -254,16 +345,12 @@
         activeType = type;
         activeCat = cat;
         document.getElementById("modal-cat-display").innerText =
-          langData[currentLang][cat];
+          langData[currentLang][cat] || cat;
         document.getElementById("m-date").valueAsDate = new Date();
         document.getElementById("m-amount").value = "";
         document.getElementById("m-notes").value = "";
         const saveBtn = document.getElementById("lbl-modal-save");
         saveBtn.style.background = type === "Income" ? "#10b981" : "#ef4444";
-        saveBtn.style.boxShadow =
-          type === "Income"
-            ? "0 10px 20px rgba(16, 185, 129, 0.3)"
-            : "0 10px 20px rgba(239, 68, 68, 0.3)";
         document.getElementById("addModal").classList.add("active");
         setTimeout(() => document.getElementById("m-amount").focus(), 300);
       }
@@ -280,7 +367,6 @@
         if (!amt) return;
         const btn = document.getElementById("lbl-modal-save");
         btn.disabled = true;
-        btn.innerText = currentLang === "mm" ? "သိမ်းနေသည်..." : "Saving...";
         const { error } = await _supabase.from("transactions").insert([
           {
             date: document.getElementById("m-date").value,
@@ -294,11 +380,8 @@
         if (!error) {
           await loadData();
           closeModal();
-        } else {
-          alert(error.message);
         }
         btn.disabled = false;
-        btn.innerText = langData[currentLang].modalSave;
       }
 
       async function loadData() {
@@ -317,7 +400,8 @@
           data.forEach((i) => {
             if (i.type === "Income") tInc += i.amount;
             else tExp += i.amount;
-            sums[i.category] = (sums[i.category] || 0) + i.amount;
+            const key = i.category.replace(/\s/g, "");
+            sums[key] = (sums[key] || 0) + i.amount;
           });
           document.getElementById("val-income").innerText =
             tInc.toLocaleString();
@@ -348,22 +432,14 @@
           langData[lang].expense;
         document.getElementById("lbl-balance").innerText =
           langData[lang].balance;
-        document
-          .getElementById("lbl-nav-history")
-          .querySelector("span").innerText = langData[lang]["nav-history"];
-        document.getElementById("lbl-inc-title").innerText =
+        document.getElementById("tab-inc-head").innerText =
           langData[lang].incTitle;
-        document.getElementById("lbl-exp-title").innerText =
+        document.getElementById("tab-exp-head").innerText =
           langData[lang].expTitle;
-        document.getElementById("lbl-modal-title").innerText =
-          langData[lang].modalTitle;
-        document.getElementById("lbl-modal-save").innerText =
-          langData[lang].modalSave;
-        document.getElementById("m-amount").placeholder =
-          langData[lang].placeAmt;
-        document.getElementById("m-notes").placeholder =
-          langData[lang].placeNotes;
-        document.getElementById("lbl-cancel").innerText = langData[lang].cancel;
+        document.getElementById("lbl-view-inc").innerText =
+          langData[lang].viewInc;
+        document.getElementById("lbl-view-exp").innerText =
+          langData[lang].viewExp;
         document.getElementById("btn-lang-toggle").innerText =
           lang === "mm" ? "ENGLISH" : "မြန်မာ";
         renderButtons();
@@ -372,11 +448,11 @@
 
       function toggleTheme() {
         const html = document.documentElement;
-        const icon = document.getElementById("theme-icon");
         const newTheme =
           html.getAttribute("data-theme") === "light" ? "dark" : "light";
         html.setAttribute("data-theme", newTheme);
-        icon.innerText = newTheme === "dark" ? "☀️" : "🌙";
+        document.getElementById("theme-icon").innerText =
+          newTheme === "dark" ? "☀️" : "🌙";
         localStorage.setItem("theme", newTheme);
       }
 
@@ -386,13 +462,6 @@
       }
 
       window.onload = async () => {
-        const {
-          data: { session },
-        } = await _supabase.auth.getSession();
-        if (!session) {
-          window.location.href = "index.html";
-          return;
-        }
         const savedTheme = localStorage.getItem("theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
         document.getElementById("theme-icon").innerText =
