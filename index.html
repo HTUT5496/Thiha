@@ -57,8 +57,9 @@
         </div>
 
         <p id="lbl-app-info">
-          ဤ Application ကို သုံးခြင်းအားဖြင့် သင့်၏ ဝင်ငွေ နှင့် ထွက်ငွေ ကို
-          ကောင်းစွာ စီမံခန့်ခွဲ နိုင်ပါသည်။
+          ငွေကြေးစီမံခန့်ခွဲမှု ဆော့ဖ်ဝဲမှ ကြိုဆိုပါသည်။ သင်၏ ပိုင်ဆိုင်မှုနှင့်
+          ဆုံးရှုံးမှုများကို အကောင်းဆုံး ခွဲခြားနိုင်ရန် ကျွန်ုပ်တို့ အမြဲ
+          ကြိုးပမ်းသွားမည်ဖြစ်ပါသည်။
         </p>
       </div>
 
@@ -102,6 +103,17 @@
           >
             အတည်ပြုလွှာ ပို့ရန်
           </button>
+
+          <div class="divider"><span>OR</span></div>
+
+          <button class="google-btn" onclick="handleGoogleLogin()">
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google"
+            />
+            <span id="lbl-google-signup">Google ဖြင့်ဝင်မည်</span>
+          </button>
+
           <div class="link-container">
             <span class="link" id="lbl-go-login" onclick="showForm('login')"
               >အကောင့်ရှိပြီးသားလား? ပြန်ဝင်ရန်</span
@@ -142,6 +154,17 @@
           >
             ဝင်မည်
           </button>
+
+          <div class="divider"><span>OR</span></div>
+
+          <button class="google-btn" onclick="handleGoogleLogin()">
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google"
+            />
+            <span id="lbl-google-login">Google ဖြင့်ဝင်မည်</span>
+          </button>
+
           <div class="link-container">
             <span class="link" id="lbl-go-signup" onclick="showForm('signup')"
               >အကောင့်အသစ်ဖွင့်ရန်</span
@@ -192,7 +215,7 @@
         mm: {
           labels: {
             "app-info":
-              "ဤ Application ကို သုံးခြင်းအားဖြင့် သင့်၏ ဝင်ငွေ နှင့် ထွက်ငွေ ကို ကောင်းစွာ စီမံခန့်ခွဲ နိုင်ပါသည်။",
+              "ငွေကြေးစီမံခန့်ခွဲမှု ဆော့ဖ်ဝဲမှ ကြိုဆိုပါသည်။ သင်၏ ပိုင်ဆိုင်မှုနှင့် ဆုံးရှုံးမှုများကို အကောင်းဆုံး ခွဲခြားနိုင်ရန် ကျွန်ုပ်တို့ အမြဲ ကြိုးပမ်းသွားမည်ဖြစ်ပါသည်။",
             "login-title": "ဝင်ရန်",
             "signup-title": "အကောင့်သစ်ဖွင့်ရန်",
             "nav-login": "ဝင်ရန်",
@@ -201,6 +224,8 @@
             "go-signup": "အကောင့်အသစ်ဖွင့်ရန်",
             "go-forgot": "စကားဝှက်မေ့နေသလား?",
             "go-login": "အကောင့်ရှိပြီးသားလား? ပြန်ဝင်ရန်",
+            "google-login": "Google ဖြင့်ဝင်မည်",
+            "google-signup": "Google ဖြင့်ဝင်မည်",
           },
           placeholders: {
             "login-email": "Gmail လိပ်စာ",
@@ -213,7 +238,7 @@
         en: {
           labels: {
             "app-info":
-              "By using this application, you can effectively manage your income and expenses.",
+              "Welcome to the financial management software. We will always try to distinguish your assets and losses in a good way.",
             "login-title": "Welcome Back",
             "signup-title": "Create Account",
             "nav-login": "Login",
@@ -222,6 +247,8 @@
             "go-signup": "Don't have an account? Sign up",
             "go-forgot": "Forgot password?",
             "go-login": "Already have an account? Login",
+            "google-login": "Sign in with Google",
+            "google-signup": "Sign up with Google",
           },
           placeholders: {
             "login-email": "Email Address",
@@ -316,6 +343,16 @@
         } else {
           setStatus("Check your Gmail to confirm!", false);
         }
+      }
+
+      async function handleGoogleLogin() {
+        const { error } = await _supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: window.location.origin + "/dashboard.html",
+          },
+        });
+        if (error) setStatus(error.message);
       }
 
       window.onload = () => {
